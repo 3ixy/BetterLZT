@@ -1,0 +1,2 @@
+# BetterLZT
+Lolzteam extension
