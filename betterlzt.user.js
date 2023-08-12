@@ -9,15 +9,15 @@
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @grant        unsafeWindow
-// @connect      lzt.hasanbek.ru
+// @connect      localhost
 // @run-at       document-body
 // @license MIT
 // ==/UserScript==
  
 
-const 
+const
     version  = "1.0",
-    server   = "http://lzt.hasanbek.ru:8880",
+    server   = "http://localhost:8880",
     adlist   = ["https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "threads", "members", "lolz.live", "zelenka.guru"];
 
 let usercss,
@@ -27,7 +27,7 @@ let usercss,
     nickname,
     userid,
     cache,
-    adnicks
+    adnicks,
     avablock;
  
 (async function() {        
@@ -38,7 +38,7 @@ let usercss,
     avablock  = await GM.getValue("avablock") ? GM.getValue("avablock") : 'null';
     cache     = await GM.getValue("cache") ? GM.getValue("cache") : 'null';
     window.addEventListener("DOMContentLoaded",(event) => {
-        marketID();
+        profileRender();
         renderFunctions();
         userid   = document.querySelector("input[name=_xfToken").value.split(",")[0];
         nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
@@ -52,14 +52,27 @@ let usercss,
     checkupdate();
 })();
 
-function marketID() {
-    if (document.querySelector(".avatarScaler"))
-    {
-        const id = /market\/user\/(\d+)\/items/.exec(document.querySelector('.userContentLinks .button[href^="market/"]').href)[1];
-        idhtml = document.createElement("div");
-        idhtml.innerHTML = `<div class="clear_fix profile_info_row"><div class="label fl_l">ID пользователя:</div><div class="labeled">${id}<span data-phr="ID скопирован в буфер обмена" onclick="Clipboard.copy(${id}, this)" class="copyButton Tooltip" title="" data-cachedtitle="Скопировать ID" tabindex="0"><i class="far fa-clone" aria-hidden="true"></i>
-        </span></div></div>`;
-        document.querySelector(".profile_info_row").prepend(idhtml)
+async function profileRender() {
+    if (!document.querySelector(".avatarScaler")) {return false;}
+    // ид юзера
+    const id = /market\/user\/(\d+)\/items/.exec(document.querySelector('.userContentLinks .button[href^="market/"]').href)[1];
+    idhtml = document.createElement("div");
+    idhtml.innerHTML = `<div class="clear_fix profile_info_row"><div class="label fl_l">ID пользователя:</div><div class="labeled">${id}<span data-phr="ID скопирован в буфер обмена" onclick="Clipboard.copy(${id}, this)" class="copyButton Tooltip" title="" data-cachedtitle="Скопировать ID" tabindex="0"><i class="far fa-clone" aria-hidden="true"></i>
+    </span></div></div>`;
+    document.querySelector(".profile_info_row").prepend(idhtml)
+
+    // фон профиля
+
+    let usernickt = document.querySelector("h1.username span").innerHTML.replace(/ <i.*?>.*?<\/i>/ig,'');
+    let data = await JSON.parse(await cache);
+    data = data.users[usernickt];
+    if (data.profilebg) {
+        document.querySelector("body").style = `
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-image: linear-gradient(rgba(54, 54, 54, 0.85), rgba(54, 54, 54, 0.85)), url('${data.profilebg}')`
     }
 }
  
@@ -127,7 +140,7 @@ async function parseUsername(e) {
     try {
         if (!data.users[e.innerHTML]) { e.classList.add("custom"); return; }
         data = data.users[e.innerHTML];
- 
+
         if (data && !e.classList.contains("custom") ) {
             e.style = data.css;
             e.classList.add("custom");
@@ -155,11 +168,11 @@ async function parseUsername(e) {
                 case "beta":
                     e.innerHTML += ` <i class="fa fa-heartbeat"></i>`
                     break;
-                case "user":
-                    e.innerHTML += ` <i class="fa fa-stars"></i>`
+                case "custom":
+                    e.innerHTML += ` ${data.statusCode}`
                     break;
                 default:
-                    e.innerHTML += ` ${data.statusCode}`
+                    e.innerHTML += ` <i class="fa fa-stars"></i>`
                     break;
             }
         } 
@@ -169,8 +182,6 @@ async function parseUsername(e) {
             svg.classList.add("avatarUserBadges");
             svg.innerHTML = `
             <span style="${data.svgcss}" class="avatarUserBadge  Tooltip uniq_default" title="" tabindex="0" data-cachedtitle="${data.bannertxt}">
-				
-				
             </span>`;
             e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder").prepend(svg)
         }
@@ -196,17 +207,7 @@ function setAvablock(e) {
     GM.setValue("avablock", e)
     avablock = e;
 }
- 
-function writeBanner(css) {
-    GM.setValue("banner", css)
-    banner = css;
-}
- 
-function writeCss(css) {
-    GM.setValue("bannertxt", css)
-    bannertxt = css;
-}
- 
+
 function renderFunctions() {
     unsafeWindow.nickname = nickname;
     unsafeWindow.usercss = usercss;
@@ -334,6 +335,17 @@ function NickStyle(type) {
 }
  
 function renderSettings() {
+
+    // Проверка на нахождение в профиле и наличие кнопки редактирования профиля
+    if (document.querySelector("a[href='account/personal-details']") && document.querySelector(".avatarScaler")) {
+        let profileeditbtn = document.createElement('a')
+        profileeditbtn.classList.add('block');
+        profileeditbtn.classList.add('button');
+        profileeditbtn.href = 'account/uniq/test';
+        profileeditbtn.innerHTML = 'Настроить BetterLZT';
+        document.querySelector(".topblock .secondaryContent").append(profileeditbtn)
+    }
+    
     $('ul.secondaryContent li:nth-child(10)').after('<li><a href="account/uniq/test">Настройка BetterLZT</a></li>');
     if(window.location.pathname == "/account/uniq/test") {
         if (document.querySelector("[name=banner_text]").value == "Lolzteam") document.querySelector("[name=banner_text]").value = "BetterLZT";
@@ -514,17 +526,39 @@ ion-icon {
   font-size: 20px;
   margin-top: 2px;
 }</style>
-        `
+<button type="button" class="button bbCodeSpoilerButton ToggleTrigger JsOnly" data-target="> .SpoilerTarget1"><span class="SpoilerTitle"><span class="SpoilerTitle">Выбрать иконку возле ника</span></span></button>
+<div class="SpoilerTarget1 bbCodeSpoilerText mn-15-0-0 dnone" style="display: block">
+<div class="scroll-wrapper allUniqList AllUniqList scrollbar-macosx scrollbar-dynamic" style="position: relative;"><div class="allUniqList AllUniqList scrollbar-macosx scrollbar-dynamic scroll-content scroll-scrolly_visible" style="height: auto; margin-bottom: 0px; margin-right: 0px; max-height: 400px;">
+
+    <h3>Бесплатные</h3>
+        <div class="Item" >
+            <i class="fas fa-spinner fa-spin"  style="--fa-primary-color: #c0c0c0; --fa-secondary-color: #1a72ff; background: none; -webkit-text-fill-color: #c0c0c0;"></i>
+        </div>
+
+        <div class="Item" >
+            <i class="fas fa-code"></i>
+        </div>
+    <h3>Платные</h3>
+        <div class="Item">
+            <i class="fas fa-spinner-third fa-spin" style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i>
+        </div>
+        <div class="Item">
+            <h4><i class="far fa-badge-check"></i> Своя иконка</h4>
+        </div>
+</div>
+<div class="scroll-element scroll-x scroll-scrolly_visible" style=""><div class="scroll-element_outer"><div class="scroll-element_size"></div><div class="scroll-element_track"></div><div class="scroll-bar" style="width: 89px;"></div></div></div><div class="scroll-element scroll-y scroll-scrolly_visible" style=""><div class="scroll-element_outer"><div class="scroll-element_size"></div><div class="scroll-element_track"></div><div class="scroll-bar" style="height: 1px; top: 0px;"></div></div></div></div>
+</div>  
+`
         document.getElementsByClassName("ToggleTriggerAnchor")[0].prepend(adduniq);
     }
 }
 
 // Ирон Ӕвзаг
 
-var replacements = [
-    { original: 'Маркет', replacement: 'Дукани' },
-    { original: 'Другое', replacement: 'Иннæ' },
-    { original: 'Создать тему', replacement: 'Ног дискусси'},
-    { original: 'Все обсуждения', replacement: 'Ӕгас дискусси'},
-    { original: 'Мои темы', replacement: 'Мæ дискусси'}
-];
+// var replacements = [
+//     { original: 'Маркет', replacement: 'Дукани' },
+//     { original: 'Другое', replacement: 'Иннæ' },
+//     { original: 'Создать тему', replacement: 'Ног дискусси'},
+//     { original: 'Все обсуждения', replacement: 'Ӕгас дискусси'},
+//     { original: 'Мои темы', replacement: 'Мæ дискусси'}
+// ];
