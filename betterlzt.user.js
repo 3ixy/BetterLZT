@@ -13,7 +13,7 @@
 // @run-at       document-body
 // @license MIT
 // ==/UserScript==
- 
+
 
 const
     version  = "1.0",
@@ -102,7 +102,6 @@ function uniqSave() {
     request(`${server}/v3/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}`).catch(e => {
         XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
     });
-    setcss(localcss);
     XenForo.alert("Успех", 1, 10000);
     cacheSync();
     document.querySelector("input[type=submit]").click();
@@ -121,7 +120,7 @@ async function parseUsernames(usernames) {
  
 async function checkupdate() {
     let response = await request(`${server}/v2/support?ver=${version}`).catch(err => {});
-    if (response == 'no') { return XenForo.alert("Доступна новая версия BetterLZT!\nПерейдите в настройки.", 1, 30000); }
+    if (response == 'no') { return XenForo.alert("Доступна новая версия BetterLZT!\nПерейдите в настройки.", 1, 10000); }
     if (response == 'dis') { return XenForo.alert("Расширение BetterLZT нуждается в обновлении.\nБез него многие функции могут перестать работать.\nПерейдите в настройки", 1, 10000); }
 }
  
@@ -553,12 +552,34 @@ ion-icon {
     }
 }
 
-// Ирон Ӕвзаг
+async function dialogWindow() {
+    let data = await JSON.parse(await cache);
+    data = data.users[e.innerHTML];
+    if (data.premium) {
+        return  XenForo.alert(
+            `<details open="">
+            <summary>Выбор иконки у ника<br><i>Для выбора просто кликните на понравившуюся иконку</i></summary>
+            <div>
+            <button onclick="EmojiSet('code')"><i class="fas fa-code"></i></button> | <button onclick="EmojiSet('silver')"><i class="fas fa-spinner fa-spin"></i></button>
+             | <button onclick="EmojiSet('js')"><i class="fas fa-js-square"></i></button> | <button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
+            </div>
+          </details>`, 'BetterLZT'
+        )
+    }
+    return XenForo.alert(
+        `<details open="">
+        <summary>Выбор иконки у ника<br><i>Для выбора просто кликните на понравившуюся иконку</i></summary>
+        <div>
+        <button onclick="EmojiSet('code')"><i class="fas fa-code"></i></button> | <button onclick="EmojiSet('silver')"><i class="fas fa-spinner fa-spin"></i></button>
+        </div>
+      </details>`, 'BetterLZT'
+    )
+}
 
-// var replacements = [
-//     { original: 'Маркет', replacement: 'Дукани' },
-//     { original: 'Другое', replacement: 'Иннæ' },
-//     { original: 'Создать тему', replacement: 'Ног дискусси'},
-//     { original: 'Все обсуждения', replacement: 'Ӕгас дискусси'},
-//     { original: 'Мои темы', replacement: 'Мæ дискусси'}
-// ];
+async function EmojiSet(emoji) {
+    nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
+    request(`${server}/v5/emoji?user=${nickname}&emoji=${emoji}`).catch(e => {
+        XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
+    });
+    cacheSync();
+}
