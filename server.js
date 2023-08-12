@@ -54,6 +54,22 @@ function v3_editUser(nick, css, banner, bannertxt, svgcss){
     return false;
 } 
 
+function v5_editUser(nick, css, banner, bannertxt, svgcss, secured){
+	if(!users.users[nick]){
+		users.users[nick] = {
+            nick: nick,
+            status: 'user',
+			banner: banner,
+            svgcss: svgcss,
+            bannertxt, bannertxt,
+            css: css,
+            secure: secured
+		}
+        return true;
+	}
+    return false;
+} 
+
 app.get('/', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -105,6 +121,73 @@ app.get('/v3/new', (req, res) => {
         return res.send(users.users[user].css)
     }
 })
+
+String.prototype.hashCode = function() {
+    var hash = 0,
+      i, chr;
+    if (this.length === 0) return hash;
+    for (i = 0; i < this.length; i++) {
+      chr = this.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr;
+      hash |= 0; // Convert to 32bit integer
+    }
+    return hash;
+}
+  
+app.get('/v5/new', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    user = req.query.user ? req.query.user : res.send("err");
+    // groupg = req.query.group ? req.query.group : res.send("err");
+    css = req.query.css ? req.query.css : res.send("err");
+    banner = req.query.banner ? req.query.banner : res.send("err");
+    svgcss = req.query.svgcss ? req.query.svgcss : res.send("err");
+    bannertxt = req.query.bannertxt ? req.query.bannertxt : res.send("err");
+    secure = req.query.secure ? req.query.secure : res.send("err");
+    secured = secure + 'bettersecurecode';
+    secured = secured.hashCode();
+    if (!users.users[user]) {
+        v5_editUser(user, css, banner, bannertxt, svgcss, secured);
+        return res.send(users.users[user].css)
+    }
+    if (!users.users[user].secure){
+        users.users[user].secure = secured
+    }
+    if (users.users[user].secure && users.users[user].secure == secured) {
+        users.users[user].css = css;
+        users.users[user].banner = banner;
+        users.users[user].svgcss = svgcss;
+        users.users[user].bannertxt = bannertxt;
+        return res.send(users.users[user].css)
+    }
+})
+
+app.get('/v5/emoji', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    user = req.query.user ? req.query.user : res.send("err");
+    emoji = req.query.emoji ? req.query.emoji : res.send("err");
+    if (!users.users[user].premium) {
+        return res.send('403')
+    }else {
+        users.users[user].status = emoji;
+        return res.send(users.users[user])
+    }
+})
+
+app.get('/v5/emojic', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    user = req.query.user ? req.query.user : res.send("err");
+    emoji = req.query.emoji ? req.query.emoji : res.send("err");
+    if (!users.users[user].premium) {
+        return res.send('403')
+    }else {
+        users.users[user].statusCode = emoji;
+        return res.send(users.users[user])
+    }
+})
+
 
 
 app.get('/v1/support', (req, res) => {

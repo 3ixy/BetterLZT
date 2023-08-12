@@ -9,7 +9,7 @@
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @grant        unsafeWindow
-// @connect      localhost
+// @connect      lzt.hasanbek.ru
 // @run-at       document-body
 // @license MIT
 // ==/UserScript==
@@ -17,7 +17,7 @@
 
 const
     version  = "1.0",
-    server   = "http://localhost:8880",
+    server   = "http://lzt.hasanbek.ru:8880",
     adlist   = ["https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "threads", "members", "lolz.live", "zelenka.guru"];
 
 let usercss,
@@ -43,8 +43,8 @@ let usercss,
         userid   = document.querySelector("input[name=_xfToken").value.split(",")[0];
         nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
         cacheSync();
+        usernames();
     })
-    usernames();
     setInterval(async () => {
         adBlockDaemon();
     }, 0);
@@ -99,12 +99,13 @@ function uniqSave() {
     banner = encodeURIComponent(banner.replace(/\n/g, "").replace(/; +/g, ";"));
     bannertxt = encodeURIComponent(bannertxt.replace(/\n/g, "").replace(/; +/g, ";"));
     svgcss = encodeURIComponent(svgcss.replace(/\n/g, "").replace(/; +/g, ";"));
-    request(`${server}/v3/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}`).catch(e => {
+    request(`${server}/v5/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}&secure=${document.querySelector("input[name=_xfToken").value.split(",")[0]+document.querySelector("input[name=_xfToken").value.split(",")[1]}`).catch(e => {
         XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
     });
     setcss(localcss);
     XenForo.alert("Успех", 1, 10000);
     cacheSync();
+    location.reload();
     document.querySelector("input[type=submit]").click();
 }
 
@@ -128,13 +129,17 @@ async function checkupdate() {
 async function cacheSync() {
     nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
     let response = await request(`${server}/v2/sync?user=${nickname}`).catch(err => {});
-    if (response != cache) {
+    if (response != cache && response != '') {
         cache = response;
-        await GM.setValue('cache', response)
+        await setCache(response);
         console.log('OK')
     }
 } 
- 
+
+async function setCache(e) {
+    return await GM.setValue('cache', e);
+}
+
 async function parseUsername(e) {
     let data = await JSON.parse(await cache);
     try {
@@ -146,36 +151,40 @@ async function parseUsername(e) {
             e.classList.add("custom");
                 switch (data.status) {
                 case "js":
-                    e.innerHTML += ` <i class="fab fa-js-square"></i>`
+                    e.innerHTML += ` <i title="BetterLZT User" class="fab fa-js-square"></i>`
                     break;
                 case "server":
-                    e.innerHTML += ` <i class="fa fa-hdd"></i>`
+                    e.innerHTML += ` <i title="BetterLZT User" class="fa fa-hdd"></i>`
                     break;
                 case "bug":
-                    e.innerHTML += ` <i class="fa fa-bug"></i>`
+                    e.innerHTML += ` <i title="BetterLZT User" class="fa fa-bug"></i>`
                     break;
                 case "code":
-                    e.innerHTML += ` <i class="fas fa-code"></i>`
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-code"></i>`
                     break;
                 case "verified":
-                    e.innerHTML += ` <i class="far fa-badge-check"></i>`
+                    e.innerHTML += ` <i title="BetterLZT User" class="far fa-badge-check"></i>`
                     break;
                 case "gold":
-                    e.innerHTML += ` <i class="fas fa-spinner-third fa-spin" style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i>`
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-spinner-third fa-spin" style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i>`
                     break;
                 case "silver":
-                    e.innerHTML += ` <i class="fas fa-spinner fa-spin"  style="--fa-primary-color: #c0c0c0; --fa-secondary-color: #1a72ff; background: none; -webkit-text-fill-color: #c0c0c0;"></i>`
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-spinner fa-spin"  style="--fa-primary-color: #c0c0c0; --fa-secondary-color: #1a72ff; background: none; -webkit-text-fill-color: #c0c0c0;"></i>`
+                    break;
                 case "beta":
-                    e.innerHTML += ` <i class="fa fa-heartbeat"></i>`
+                    e.innerHTML += ` <i title="BetterLZT User" class="fa fa-heartbeat"></i>`
+                    break;
+                case "cookie":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-cookie" style="-webkit-text-fill-color: #228e5d;"></i>`
                     break;
                 case "custom":
                     e.innerHTML += ` ${data.statusCode}`
                     break;
                 default:
-                    e.innerHTML += ` <i class="fa fa-stars"></i>`
+                    e.innerHTML += ` <i title="BetterLZT User" class="fa fa-stars"></i>`
                     break;
             }
-        } 
+        }
         if (e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)") && data.svgcss) {
             let svg = document.createElement('div');
             e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)").classList.add("custom")
@@ -216,9 +225,10 @@ function renderFunctions() {
     unsafeWindow.adblock = adblock;
     unsafeWindow.avablock = avablock;
     unsafeWindow.setAdblock = e => setAdblock(e);
+    unsafeWindow.setCache = e => setCache(e);
     unsafeWindow.setAvablock = e => setAvablock(e);
     unsafeWindow.request = request;
-    let torender = [uniqSave, getUID, usernames, parseUsername, parseUsernames, cacheSync, blockNotice, BannerStyle, NickStyle];
+    let torender = [uniqSave, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, parseUsernames, cacheSync, blockNotice, BannerStyle, NickStyle];
     let funcs = torender.map(e => e.toString());
     let script = document.createElement('script');
     script.appendChild(document.createTextNode(funcs.join("")));
@@ -337,11 +347,13 @@ function NickStyle(type) {
 function renderSettings() {
 
     // Проверка на нахождение в профиле и наличие кнопки редактирования профиля
-    if (document.querySelector("a[href='account/personal-details']") && document.querySelector(".avatarScaler")) {
+    if (document.querySelector(".secondaryContent a.button.block[href='account/personal-details']")) {
         let profileeditbtn = document.createElement('a')
         profileeditbtn.classList.add('block');
         profileeditbtn.classList.add('button');
-        profileeditbtn.href = 'account/uniq/test';
+        profileeditbtn.onclick = function () {
+            dialogWindow();
+        };
         profileeditbtn.innerHTML = 'Настроить BetterLZT';
         document.querySelector(".topblock .secondaryContent").append(profileeditbtn)
     }
@@ -526,33 +538,12 @@ ion-icon {
   font-size: 20px;
   margin-top: 2px;
 }</style>
-<button type="button" class="button bbCodeSpoilerButton ToggleTrigger JsOnly" data-target="> .SpoilerTarget1"><span class="SpoilerTitle"><span class="SpoilerTitle">Выбрать иконку возле ника</span></span></button>
-<div class="SpoilerTarget1 bbCodeSpoilerText mn-15-0-0 dnone" style="display: block">
-<div class="scroll-wrapper allUniqList AllUniqList scrollbar-macosx scrollbar-dynamic" style="position: relative;"><div class="allUniqList AllUniqList scrollbar-macosx scrollbar-dynamic scroll-content scroll-scrolly_visible" style="height: auto; margin-bottom: 0px; margin-right: 0px; max-height: 400px;">
-
-    <h3>Бесплатные</h3>
-        <div class="Item" >
-            <i class="fas fa-spinner fa-spin"  style="--fa-primary-color: #c0c0c0; --fa-secondary-color: #1a72ff; background: none; -webkit-text-fill-color: #c0c0c0;"></i>
-        </div>
-
-        <div class="Item" >
-            <i class="fas fa-code"></i>
-        </div>
-    <h3>Платные</h3>
-        <div class="Item">
-            <i class="fas fa-spinner-third fa-spin" style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i>
-        </div>
-        <div class="Item">
-            <h4><i class="far fa-badge-check"></i> Своя иконка</h4>
-        </div>
-</div>
-<div class="scroll-element scroll-x scroll-scrolly_visible" style=""><div class="scroll-element_outer"><div class="scroll-element_size"></div><div class="scroll-element_track"></div><div class="scroll-bar" style="width: 89px;"></div></div></div><div class="scroll-element scroll-y scroll-scrolly_visible" style=""><div class="scroll-element_outer"><div class="scroll-element_size"></div><div class="scroll-element_track"></div><div class="scroll-bar" style="height: 1px; top: 0px;"></div></div></div></div>
-</div>  
 `
         document.getElementsByClassName("ToggleTriggerAnchor")[0].prepend(adduniq);
     }
 }
 
+<<<<<<< Updated upstream
 // Ирон Ӕвзаг
 
 // var replacements = [
@@ -562,3 +553,71 @@ ion-icon {
 //     { original: 'Все обсуждения', replacement: 'Ӕгас дискусси'},
 //     { original: 'Мои темы', replacement: 'Мæ дискусси'}
 // ];
+=======
+
+async function dialogWindow() {
+    nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
+    let data = await JSON.parse(await cache);
+    data = data.users[nickname];
+
+    let htmlall = `
+    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>Фон профиля</summary>
+        <div style="margin-top: -25px">
+            <input id="bgurl" placeholder="Ссылка на картинку"> <a onclick="BgSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
+        </div>
+    </details>
+    <a class="button leftButton primary OverlayTrigger" href="account/uniq/test">Настроить уник</a>
+    
+    <a class="button leftButton primary OverlayTrigger" href="https://hasantigiev.t.me">Приобрести Premium</a> <i>* 59 RUB. Бессрочно</i>
+    `
+
+    let html_prem = `
+    <details style="padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>Выбор иконки у ника<br><i>Для выбора просто кликните на понравившуюся иконку</i></summary>
+        <div style="margin-top: -25px">
+        <button onclick="EmojiSet('code')"><i class="fas fa-code"></i></button> <button onclick="EmojiSet('silver')"><i class="fas fa-spinner fa-spin"></i></button>
+        <p>Premium  <i> <i class="fas fa-info"></i> Нужен Premium</i></p> <button onclick="EmojiSet('cookie')"><i class="fas fa-cookie" style="color: #228e5d;"></i></button> <button onclick="EmojiSet('gold')"><i title="BetterLZT User" class="fas fa-spinner-third fa-spin" color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('js')" style="width: 35px; height: 35px; color: rgb(34,142,93); background: #303030; border: solid 1px white; font-size: 25px; margin-bottom: 5px; margin-left: 5px;"><i class="fab fa-js-square"></i></button> <button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
+        <a class="button leftButton primary OverlayTrigger" href="https://hasantigiev.t.me">Установить свое</a>
+        </div>
+    </details>
+    
+    ${htmlall}
+
+    <style>
+    details button {
+        width: 35px; height: 35px; color: rgb(34,142,93); background: #303030; border: solid 1px white; font-size: 25px; margin-bottom: 5px; margin-left: 5px;
+    }
+    details input {
+        padding: 6px;
+        border-radius: 6px;
+        background: #303030;
+        color: white;
+        border: 1px solid rgb(54, 54, 54);
+    }
+    </style>
+    `;
+    return  XenForo.alert(
+        `${html_prem}`, 'BetterLZT'
+    )
+}
+
+async function EmojiSet(emoji) {
+    nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
+    request(`${server}/v5/emoji?user=${nickname}&emoji=${emoji}`).catch(e => {
+        XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
+    });
+    cacheSync();
+    location.reload();
+}
+
+async function BgSet() {
+    nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
+    bg = document.querySelector("#bgurl").value
+    request(`${server}/v5/bg?user=${nickname}&bg=${bg}`).catch(e => {
+        XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
+    });
+    cacheSync();
+    location.reload();
+}
+>>>>>>> Stashed changes
