@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BetterLZT
 // @namespace    hasanbet
-// @version      v1
+// @version      v5.1
 // @description  Free UNIQ??? ADBLOCK????
 // @author       https://zelenka.guru/openresty (openresty)
 // @match        https://zelenka.guru/*
@@ -16,7 +16,7 @@
  
 
 const
-    version  = "1.0",
+    version  = "1.1",
     server   = "http://lzt.hasanbek.ru:8880",
     adlist   = ["https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "threads", "members", "lolz.live", "zelenka.guru"];
 
@@ -99,7 +99,7 @@ function uniqSave() {
     banner = encodeURIComponent(banner.replace(/\n/g, "").replace(/; +/g, ";"));
     bannertxt = encodeURIComponent(bannertxt.replace(/\n/g, "").replace(/; +/g, ";"));
     svgcss = encodeURIComponent(svgcss.replace(/\n/g, "").replace(/; +/g, ";"));
-    request(`${server}/v5/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}&secure=${document.querySelector("input[name=_xfToken").value.split(",")[0]+document.querySelector("input[name=_xfToken").value.split(",")[1]}`).catch(e => {
+    request(`${server}/v5/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}&secure=${document.querySelector("input[name=_xfToken").value.split(",")[0]}`).catch(e => {
         XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
     });
     setcss(localcss);

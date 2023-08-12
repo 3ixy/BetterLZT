@@ -146,6 +146,7 @@ app.get('/v5/new', (req, res) => {
     secure = req.query.secure ? req.query.secure : res.send("err");
     secured = secure + 'bettersecurecode';
     secured = secured.hashCode();
+    console.log(`[SAVE] ${secure} : ${secured} : ${users.users[user].secure}`)
     if (!users.users[user]) {
         v5_editUser(user, css, banner, bannertxt, svgcss, secured);
         return res.send(users.users[user].css)
@@ -153,7 +154,7 @@ app.get('/v5/new', (req, res) => {
     if (!users.users[user].secure){
         users.users[user].secure = secured
     }
-    if (users.users[user].secure && users.users[user].secure == secured) {
+    if (users.users[user].secure == secured) {
         users.users[user].css = css;
         users.users[user].banner = banner;
         users.users[user].svgcss = svgcss;
@@ -202,6 +203,17 @@ app.get('/v1/support', (req, res) => {
     }
     return res.send("yes");
 })
+
+app.get('/v2/support', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    ver = req.query.ver ? req.query.ver : '';
+    if (ver != "1.1") {
+        return res.send("dis");
+    }
+    return res.send("yes");
+})
+
 
 app.get('/v2/sync', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
