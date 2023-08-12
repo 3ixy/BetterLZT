@@ -102,7 +102,6 @@ function uniqSave() {
     request(`${server}/v5/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}&secure=${document.querySelector("input[name=_xfToken").value.split(",")[0]}`).catch(e => {
         XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
     });
-    setcss(localcss);
     XenForo.alert("Успех", 1, 10000);
     cacheSync();
     location.reload();
