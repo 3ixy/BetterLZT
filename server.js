@@ -167,7 +167,7 @@ app.get('/v5/emoji', (req, res) => {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     user = req.query.user ? req.query.user : res.send("err");
     emoji = req.query.emoji ? req.query.emoji : res.send("err");
-    if (!users.users[user].premium) {
+    if (!users.users[user].premium && emoji == "cookie" || emoji == "gold" || emoji == "js" || emoji == "verified") {
         return res.send('403')
     }else {
         users.users[user].status = emoji;
