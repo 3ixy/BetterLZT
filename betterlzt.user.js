@@ -543,17 +543,6 @@ ion-icon {
     }
 }
 
-<<<<<<< Updated upstream
-// Ирон Ӕвзаг
-
-// var replacements = [
-//     { original: 'Маркет', replacement: 'Дукани' },
-//     { original: 'Другое', replacement: 'Иннæ' },
-//     { original: 'Создать тему', replacement: 'Ног дискусси'},
-//     { original: 'Все обсуждения', replacement: 'Ӕгас дискусси'},
-//     { original: 'Мои темы', replacement: 'Мæ дискусси'}
-// ];
-=======
 
 async function dialogWindow() {
     nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
@@ -620,4 +609,3 @@ async function BgSet() {
     cacheSync();
     location.reload();
 }
->>>>>>> Stashed changes
