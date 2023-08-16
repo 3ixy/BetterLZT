@@ -133,10 +133,23 @@ String.prototype.hashCode = function() {
     }
     return hash;
 }
-  
+
+app.get('/v5/stemp', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    user = req.query.user ? req.query.user : res.send("err");
+    secured = secure + 'bettersecurecode';
+    secured = secured.hashCode();
+    // console.log(`[SAVE] ${secure} : ${secured} : ${users.users[user].secure ? users.users[user].secure : 'no'}`)
+    users.users[user].secure = 'temp'
+    return res.send('200')
+   
+})
+
 app.get('/v5/new', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
     user = req.query.user ? req.query.user : res.send("err");
     // groupg = req.query.group ? req.query.group : res.send("err");
     css = req.query.css ? req.query.css : res.send("err");
@@ -146,20 +159,30 @@ app.get('/v5/new', (req, res) => {
     secure = req.query.secure ? req.query.secure : res.send("err");
     secured = secure + 'bettersecurecode';
     secured = secured.hashCode();
-    console.log(`[SAVE] ${secure} : ${secured} : ${users.users[user].secure}`)
+    console.log(ip);
+    if (ip == '::ffff:46.42.16.91' || ip == '::ffff:5.181.20.131') {
+        console.log('eblan');
+        return res.send('200');
+    }
+    // console.log(`[SAVE] ${secure} : ${secured} : ${users.users[user].secure ? users.users[user].secure : 'no'}`)
     if (!users.users[user]) {
         v5_editUser(user, css, banner, bannertxt, svgcss, secured);
-        return res.send(users.users[user].css)
+        return res.send('200')
     }
-    if (!users.users[user].secure){
+    if (users.users[user] && !users.users[user].secure){
+        // users.users[user].secure = secured
+        return res.send('401')
+    }
+    if (users.users[user] && users.users[user].secure == 'temp'){
         users.users[user].secure = secured
+        // return res.send('401')
     }
     if (users.users[user].secure == secured) {
         users.users[user].css = css;
         users.users[user].banner = banner;
         users.users[user].svgcss = svgcss;
         users.users[user].bannertxt = bannertxt;
-        return res.send(users.users[user].css)
+        return res.send('200')
     }
 })
 
@@ -192,6 +215,34 @@ app.get('/v5/emojic', (req, res) => {
     }
 })
 
+<<<<<<< Updated upstream
+=======
+app.get('/v5/color', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    user = req.query.user ? req.query.user : res.send("err");
+    color = req.query.color ? req.query.color : res.send("err");
+    if (!users.users[user].premium) {
+        return res.send('403')
+    }else {
+        users.users[user].maincolor = color;
+        return res.send(users.users[user])
+    }
+})
+
+app.get('/v5/bg', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    user = req.query.user ? req.query.user : res.send("err");
+    bg = req.query.bg ? req.query.bg : res.send("err");
+    if (!users.users[user]) {
+        return res.send('403')
+    }else {
+        users.users[user].profilebg = bg;
+        return res.send(users.users[user])
+    }
+})
+>>>>>>> Stashed changes
 
 
 app.get('/v1/support', (req, res) => {
@@ -208,7 +259,7 @@ app.get('/v2/support', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     ver = req.query.ver ? req.query.ver : '';
-    if (ver != "1.1") {
+    if (ver != "1.2") {
         return res.send("dis");
     }
     return res.send("yes");

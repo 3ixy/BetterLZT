@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         BetterLZT
 // @namespace    hasanbet
-// @version      v5.1
+// @version      v5.35
 // @description  Free UNIQ??? ADBLOCK????
 // @author       https://zelenka.guru/openresty (openresty)
 // @match        https://zelenka.guru/*
+// @match        https://lzt.market/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM.setValue
 // @grant        GM.getValue
@@ -16,7 +17,11 @@
  
 
 const
+<<<<<<< Updated upstream
     version  = "1.1",
+=======
+    version  = "1.2",
+>>>>>>> Stashed changes
     server   = "http://lzt.hasanbek.ru:8880",
     adlist   = ["https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "threads", "members", "lolz.live", "zelenka.guru"];
 
@@ -28,6 +33,7 @@ let usercss,
     userid,
     cache,
     adnicks,
+    secure,
     avablock;
  
 (async function() {        
@@ -37,8 +43,10 @@ let usercss,
     adblock   = await GM.getValue("adblock") ? GM.getValue("adblock") : 'null';
     avablock  = await GM.getValue("avablock") ? GM.getValue("avablock") : 'null';
     cache     = await GM.getValue("cache") ? GM.getValue("cache") : 'null';
+    secure    = await GM.getValue("secure") ? GM.getValue("secure") : 'not';
     window.addEventListener("DOMContentLoaded",(event) => {
         profileRender();
+        themeRender();
         renderFunctions();
         userid   = document.querySelector("input[name=_xfToken").value.split(",")[0];
         nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
@@ -51,6 +59,33 @@ let usercss,
     setInterval(usernames, 500);
     checkupdate();
 })();
+
+async function themeRender() {
+    let usernickt = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
+    let data = await JSON.parse(await cache);
+    data = data.users[usernickt];
+    if (data) {
+        if (data.profilebg) {
+            document.querySelector("body").style = `
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-image: linear-gradient(rgba(54, 54, 54, 0.85), rgba(54, 54, 54, 0.85)), url('${data.profilebg}')`
+        }
+    }
+
+    // акцент профиля
+    // .messageSimple .secondaryContent .darkBackground .tabs .simpleRedactor .pageNavLinkGroup
+    if (data) {
+        if (data.maincolor) {
+            styles = `#header, .messageSimple, .discussionList, .sidebar .sidebarWrapper, .secondaryContent, .darkBackground, .tabs, .simpleRedactor, .pageNavLinkGroup {background: ${data.maincolor};} .page_top {border-bottom: 0;} .counts_module {border-top: 0;}`
+            let styleSheet = document.createElement("style")
+            styleSheet.innerText = styles;
+            document.head.appendChild(styleSheet);
+        }
+    }
+}
 
 async function profileRender() {
     if (!document.querySelector(".avatarScaler")) {return false;}
@@ -66,14 +101,89 @@ async function profileRender() {
     let usernickt = document.querySelector("h1.username span").innerHTML.replace(/ <i.*?>.*?<\/i>/ig,'');
     let data = await JSON.parse(await cache);
     data = data.users[usernickt];
-    if (data.profilebg) {
-        document.querySelector("body").style = `
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
-        background-image: linear-gradient(rgba(54, 54, 54, 0.85), rgba(54, 54, 54, 0.85)), url('${data.profilebg}')`
+    if (data) {
+        if (data.profilebg) {
+            document.querySelector("body").style = `
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-image: linear-gradient(rgba(54, 54, 54, 0.85), rgba(54, 54, 54, 0.85)), url('${data.profilebg}')`
+        }
     }
+<<<<<<< Updated upstream
+=======
+
+    // акцент профиля
+    // .messageSimple .secondaryContent .darkBackground .tabs .simpleRedactor .pageNavLinkGroup
+    if (data) {
+        if (data.maincolor) {
+            styles = `.messageSimple, .secondaryContent, .darkBackground, .tabs, .simpleRedactor, .pageNavLinkGroup {background: ${data.maincolor};} .page_top {border-bottom: 0;} .counts_module {border-top: 0;}`
+            let styleSheet = document.createElement("style")
+            styleSheet.innerText = styles;
+            document.head.appendChild(styleSheet);
+        }
+    }
+
+    // плашка с депозитом
+
+    let deposit = parseInt(document.querySelector('h3.amount').innerHTML.replace('₽','').replace(' ',''));
+    if (deposit >= 10000 && deposit < 50000) {
+        let pref = document.createElement('span');
+        pref.style = `color: #f5f5f5;padding: 2px 8px;
+        margin: 0px 0px 0px 6px;
+        border-radius: 0px 6px 6px 0px;
+        display: inline-block;
+        background: #47626f;
+        line-height: 16px;
+        font-size: 12px;`;
+        pref.innerHTML = "Депозит";
+        pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
+        let nickarea = document.querySelector("h1 span").append(pref);
+    }
+    if (deposit >= 50000 && deposit < 100000) {
+        let pref = document.createElement('span');
+        pref.style = `color: #f5f5f5;padding: 2px 8px;
+        margin: 0px 0px 0px 6px;
+        border-radius: 0px 6px 6px 0px;
+        display: inline-block;
+        background: #8a315d;
+        line-height: 16px;
+        font-size: 12px;`;
+        pref.innerHTML = "Депозит";
+        pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
+        let nickarea = document.querySelector("h1 span").append(pref);
+    }
+    if (deposit >= 100000) {
+        let pref = document.createElement('span');
+        pref.style = `color: #f5f5f5;padding: 2px 8px;
+        margin: 0px 0px 0px 6px;
+        border-radius: 0px 6px 6px 0px;
+        display: inline-block;
+        background: #8152C6;
+        line-height: 16px;
+        font-size: 12px;`;
+        pref.innerHTML = "Депозит";
+        pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
+        let nickarea = document.querySelector("h1 span").append(pref);
+    }
+    // Плашка Premium
+    // if (data) {
+    //     if (data.premium) {
+    //         let pref = document.createElement('span');
+    //         pref.style = `color: #f5f5f5;padding: 2px 8px;
+    //         margin: 0px 0px 0px 6px;
+    //         border-radius: 6px 0px 0px 6px;
+    //         display: inline-block;
+    //         background: #ff0076;
+    //         line-height: 16px;
+    //         font-size: 12px;`;
+    //         pref.innerHTML = "Premium";
+    //         pref.title = "BetterLZT Premium";
+    //         let nickarea = document.querySelector("h1 span").append(pref);
+    //     }
+    // }
+>>>>>>> Stashed changes
 }
  
 function request(url) {
@@ -88,8 +198,13 @@ function request(url) {
 function getUID() {
     return document.querySelector("input[name=_xfToken").value.split(",")[0];
 }
+<<<<<<< Updated upstream
  
 function uniqSave() {
+=======
+
+async function uniqSave() {
+>>>>>>> Stashed changes
     nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
     localcss = document.getElementsByClassName("UsernameCss")[0].value;
     banner = document.getElementsByClassName("BannerCss")[0].value;
@@ -99,12 +214,23 @@ function uniqSave() {
     banner = encodeURIComponent(banner.replace(/\n/g, "").replace(/; +/g, ";"));
     bannertxt = encodeURIComponent(bannertxt.replace(/\n/g, "").replace(/; +/g, ";"));
     svgcss = encodeURIComponent(svgcss.replace(/\n/g, "").replace(/; +/g, ";"));
-    request(`${server}/v5/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}&secure=${document.querySelector("input[name=_xfToken").value.split(",")[0]}`).catch(e => {
+
+    if (secure == 'null') {
+        await setSecure(`${document.querySelector("input[name=_xfToken").value.split(",")[0]+document.querySelector("input[name=_xfToken").value.split(",")[1]}`);
+    }
+    let req = request(`${server}/v5/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}&secure=${secure}`).catch(e => {
         XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
     });
-    XenForo.alert("Успех", 1, 10000);
-    cacheSync();
-    location.reload();
+    if (req != '200') {
+        XenForo.alert("Ошибка синхронизации с сервером, свяжитесь с разработчиком t.me/hasantigiev or zelenka.guru/lays", 1, 10000)
+    }
+    if (req == '401') {
+        XenForo.alert("Для вашего профиля не найдены ключи авторизации. Cвяжитесь с разработчиком t.me/hasantigiev or zelenka.guru/lays", 1, 10000)
+    }else {
+        XenForo.alert("Успех", 1, 10000);
+        cacheSync();
+        location.reload();
+    }
     document.querySelector("input[type=submit]").click();
 }
 
@@ -137,6 +263,10 @@ async function cacheSync() {
 
 async function setCache(e) {
     return await GM.setValue('cache', e);
+}
+
+async function setSecure(e) {
+    return await GM.setValue('secure', e);
 }
 
 async function parseUsername(e) {
@@ -175,6 +305,21 @@ async function parseUsername(e) {
                     break;
                 case "cookie":
                     e.innerHTML += ` <i title="BetterLZT User" class="fas fa-cookie" style="-webkit-text-fill-color: #228e5d;"></i>`
+                    break;
+                case "admin":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-wrench" style="-webkit-text-fill-color: rgb(150,68,72);"></i> `
+                    break;
+                case "moderate":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-bolt" style="-webkit-text-fill-color: #12470D;"></i> `
+                    break;
+                case "smoderate":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-bolt" style="-webkit-text-fill-color: rgb(46,162,74);"></i> `
+                    break;
+                case "arbitr":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-gavel" style="-webkit-text-fill-color: rgb(255,154,252);"></i> `
+                    break;
+                case "editor":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-pen" style="-webkit-text-fill-color: rgb(0,135,255);"></i> `
                     break;
                 case "custom":
                     e.innerHTML += ` ${data.statusCode}`
@@ -223,8 +368,10 @@ function renderFunctions() {
     unsafeWindow.cache = cache;
     unsafeWindow.adblock = adblock;
     unsafeWindow.avablock = avablock;
+    unsafeWindow.secure = secure;
     unsafeWindow.setAdblock = e => setAdblock(e);
     unsafeWindow.setCache = e => setCache(e);
+    unsafeWindow.setSecure = e => setSecure(e);
     unsafeWindow.setAvablock = e => setAvablock(e);
     unsafeWindow.request = request;
     let torender = [uniqSave, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, parseUsernames, cacheSync, blockNotice, BannerStyle, NickStyle];
@@ -555,18 +702,58 @@ async function dialogWindow() {
             <input id="bgurl" placeholder="Ссылка на картинку"> <a onclick="BgSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
         </div>
     </details>
+<<<<<<< Updated upstream
     <a class="button leftButton primary OverlayTrigger" href="account/uniq/test">Настроить уник</a>
     
     <a class="button leftButton primary OverlayTrigger" href="https://hasantigiev.t.me">Приобрести Premium</a> <i>* 59 RUB. Бессрочно</i>
+=======
+
+    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>Кастомизация темы<br><i class="fas fa-info"></i> Нужен Premium</i></summary>
+        <div style="margin-top: -25px">
+            <i>Все пользователи расширения при посещении вашего профиля увидят замененный цвет</i>
+            <input id="colorbg" placeholder="цвет в формате rgba()"> <a onclick="ColorSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
+            
+            <i>Данную тему вы будете видеть на всех страницах форума и маркета</i>
+            </div>
+    </details>
+    <a class="button leftButton primary" href="account/uniq/test">Настроить уник</a>
+
+    <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Приобрести Premium</a> <i>* 59 RUB. Бессрочно</i>
+>>>>>>> Stashed changes
     `
+
+    /*
+        case "admin":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-wrench" style="-webkit-text-fill-color: rgb(150,68,72);"></i> `
+                    break;
+                case "moderate":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-bolt" style="-webkit-text-fill-color: rgb(150,68,72);"></i> `
+                    break;
+                case "smoderate":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-bolt" style="-webkit-text-fill-color: rgb(46,162,74);"></i> `
+                    break;
+                case "arbitr":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-gavel" style="-webkit-text-fill-color: rgb(255,154,252);"></i> `
+                    break;
+                case "editor":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-pen" style="-webkit-text-fill-color: rgb(0,135,255);"></i> `
+                    break;
+    */
 
     let html_prem = `
     <details style="padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
         <summary>Выбор иконки у ника<br><i>Для выбора просто кликните на понравившуюся иконку</i></summary>
         <div style="margin-top: -25px">
         <button onclick="EmojiSet('code')"><i class="fas fa-code"></i></button> <button onclick="EmojiSet('silver')"><i class="fas fa-spinner fa-spin"></i></button>
+<<<<<<< Updated upstream
         <p>Premium  <i> <i class="fas fa-info"></i> Нужен Premium</i></p> <button onclick="EmojiSet('cookie')"><i class="fas fa-cookie" style="color: #228e5d;"></i></button> <button onclick="EmojiSet('gold')"><i title="BetterLZT User" class="fas fa-spinner-third fa-spin" color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('js')" style="width: 35px; height: 35px; color: rgb(34,142,93); background: #303030; border: solid 1px white; font-size: 25px; margin-bottom: 5px; margin-left: 5px;"><i class="fab fa-js-square"></i></button> <button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
         <a class="button leftButton primary OverlayTrigger" href="https://hasantigiev.t.me">Установить свое</a>
+=======
+        <p>Premium  <i> <i class="fas fa-info"></i> Нужен Premium</i></p> <button onclick="EmojiSet('cookie')"><i class="fas fa-cookie" style="color: #228e5d;"></i></button><button onclick="EmojiSet('gold')"><i title="BetterLZT User" class="fas fa-spinner-third fa-spin"  style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('js')"><i class="fab fa-js-square" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('python')"><i class="fab fa-python" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
+        <button onclick="EmojiSet('admin')"><i class="fas fa-wrench" style="color: rgb(150,68,72);"></i></button><button onclick="EmojiSet('moderate')"><i class="fas fa-bolt" style="color: #12470D"></i></button><button onclick="EmojiSet('smoderate')"><i class="fas fa-bolt" style="color: rgb(46,162,74);"></i></button><button onclick="EmojiSet('arbitr')"><i class="fas fa-gavel" style="color: rgb(255,154,252);"></i></button><button onclick="EmojiSet('editor')"><i class="fas fa-pen" style="color: rgb(0,135,255);"></i></button>
+        <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Установить свое</a>
+>>>>>>> Stashed changes
         </div>
     </details>
     
