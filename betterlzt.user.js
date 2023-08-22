@@ -1,24 +1,26 @@
 // ==UserScript==
 // @name         BetterLZT
 // @namespace    hasanbet
-// @version      v5.1
+// @version      v10
 // @description  Free UNIQ??? ADBLOCK????
 // @author       https://zelenka.guru/openresty (openresty)
 // @match        https://zelenka.guru/*
+// @match        https://lzt.market/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @grant        unsafeWindow
-// @connect      localhost
+// @connect      lzt.hasanbek.ru
 // @run-at       document-body
 // @license MIT
 // ==/UserScript==
 
 
 const
-    version  = "1.2",
-    server   = "http://localhost:8880",
-    adlist   = ["https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "threads", "members", "lolz.live", "zelenka.guru"];
+    version    = "2.3",
+    server     = "http://lzt.hasanbek.ru:8880",
+    adlist_w   = ["https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/5456926/", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607 - КАЧЕСТВЕННЫЙ ДИЗАЙН", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam"],
+    adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru"];
 
 let usercss,
     adblock,
@@ -28,6 +30,8 @@ let usercss,
     userid,
     cache,
     adnicks,
+    secure,
+    hidelike,
     avablock;
 
 (async function() {
@@ -37,13 +41,17 @@ let usercss,
     adblock   = await GM.getValue("adblock") ? GM.getValue("adblock") : 'null';
     avablock  = await GM.getValue("avablock") ? GM.getValue("avablock") : 'null';
     cache     = await GM.getValue("cache") ? GM.getValue("cache") : 'null';
+    secure    = await GM.getValue("secure") ? GM.getValue("secure") : 'not';
+    hidelike    = await GM.getValue("hidelike") ? GM.getValue("hidelike") : 'null';
     window.addEventListener("DOMContentLoaded",(event) => {
         profileRender();
+        themeRender();
         renderFunctions();
         userid   = document.querySelector("input[name=_xfToken").value.split(",")[0];
         nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
         cacheSync();
         usernames();
+        marketRender();
     })
     setInterval(async () => {
         adBlockDaemon();
@@ -51,6 +59,34 @@ let usercss,
     setInterval(usernames, 500);
     checkupdate();
 })();
+
+async function themeRender() {
+    if (document.querySelector(".avatarScaler")) {return false;}
+    let usernickt = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
+    let data = await JSON.parse(await cache);
+    data = data.users[usernickt];
+    if (data) {
+        if (data.profilebg) {
+            document.querySelector("body").style = `
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-image: linear-gradient(rgba(54, 54, 54, 0.85), rgba(54, 54, 54, 0.85)), url('${data.profilebg}')`
+        }
+    }
+
+    // акцент профиля
+    // .messageSimple .secondaryContent .darkBackground .tabs .simpleRedactor .pageNavLinkGroup
+    if (data) {
+        if (data.maincolor) {
+            styles = `#header, .messageSimple, .discussionList, .sidebar .sidebarWrapper, .secondaryContent, .darkBackground, .tabs, .simpleRedactor, .pageNavLinkGroup {background: ${data.maincolor};} .page_top {border-bottom: 0;} .counts_module {border-top: 0;}`
+            let styleSheet = document.createElement("style")
+            styleSheet.innerText = styles;
+            document.head.appendChild(styleSheet);
+        }
+    }
+}
 
 async function profileRender() {
     if (!document.querySelector(".avatarScaler")) {return false;}
@@ -66,22 +102,96 @@ async function profileRender() {
     let usernickt = document.querySelector("h1.username span").innerHTML.replace(/ <i.*?>.*?<\/i>/ig,'');
     let data = await JSON.parse(await cache);
     data = data.users[usernickt];
-    if (data.profilebg) {
-        document.querySelector("body").style = `
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
-        background-image: linear-gradient(rgba(54, 54, 54, 0.85), rgba(54, 54, 54, 0.85)), url('${data.profilebg}')`
+    if (data) {
+        if (data.profilebg) {
+            document.querySelector("body").style = `
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-image: linear-gradient(rgba(54, 54, 54, 0.85), rgba(54, 54, 54, 0.85)), url('${data.profilebg}')`
+        }
     }
 
     // акцент профиля
     // .messageSimple .secondaryContent .darkBackground .tabs .simpleRedactor .pageNavLinkGroup
-    if (data.maincolor) {
-        styles = `.messageSimple, .secondaryContent, .darkBackground, .tabs, .simpleRedactor, .pageNavLinkGroup {background: ${data.maincolor};}`
-        let styleSheet = document.createElement("style")
-        styleSheet.innerText = styles;
-        document.head.appendChild(styleSheet)
+    if (data) {
+        if (data.maincolor) {
+            styles = `#header, .messageSimple, .discussionList, .sidebar .sidebarWrapper, .secondaryContent, .darkBackground, .tabs, .simpleRedactor, .pageNavLinkGroup {background: ${data.maincolor};} .page_top {border-bottom: 0;} .counts_module {border-top: 0;}`
+            let styleSheet = document.createElement("style")
+            styleSheet.innerText = styles;
+            document.head.appendChild(styleSheet);
+        }
+    }
+
+    // плашка с депозитом
+
+    let deposit = parseInt(document.querySelector('h3.amount').innerHTML.replace('₽','').replace(' ',''));
+    if (deposit >= 10000 && deposit < 50000) {
+        let pref = document.createElement('span');
+        pref.style = `color: #f5f5f5;padding: 2px 8px;
+        margin: 0px 0px 0px 6px;
+        border-radius: 0px 6px 6px 0px;
+        display: inline-block;
+        margin-left: 25px;
+        background: #47626f;
+        line-height: 16px;
+        font-size: 12px;`;
+        pref.innerHTML = "Депозит";
+        pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
+        let nickarea = document.querySelector("h1 span").append(pref);
+    }
+    if (deposit >= 50000 && deposit < 100000) {
+        let pref = document.createElement('span');
+        pref.style = `color: #f5f5f5;padding: 2px 8px;
+        margin: 0px 0px 0px 6px;
+        border-radius: 0px 6px 6px 0px;
+        display: inline-block;
+        margin-left: 25px;
+        background: #8a315d;
+        line-height: 16px;
+        font-size: 12px;`;
+        pref.innerHTML = "Депозит";
+        pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
+        let nickarea = document.querySelector("h1 span").append(pref);
+    }
+    if (deposit >= 100000) {
+        let pref = document.createElement('span');
+        pref.style = `color: #f5f5f5;padding: 2px 8px;
+        margin: 0px 0px 0px 6px;
+        border-radius: 0px 6px 6px 0px;
+        margin-left: 25px;
+        display: inline-block;
+        background: #8152C6;
+        line-height: 16px;
+        font-size: 12px;`;
+        pref.innerHTML = "Депозит";
+        pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
+        let nickarea = document.querySelector("h1 span").append(pref);
+    }
+    // Плашка Premium
+    // if (data) {
+        // if (data.premium) {
+        //     let pref = document.createElement('span');
+        //     pref.style = `color: #f5f5f5;padding: 2px 8px;
+        //     margin: 0px 0px 0px 6px;
+        //     border-radius: 6px 0px 0px 6px;
+        //     display: inline-block;
+        //     background: #ff0076;
+        //     margin-left: 25px;
+        //     line-height: 16px;
+        //     font-size: 12px;`;
+        //     pref.innerHTML = "Premium";
+        //     pref.title = "BetterLZT Premium";
+        //     let nickarea = document.querySelector("h1 span").append(pref);
+        // }
+    // }
+
+
+    // Скрытие лайков
+
+    if (await hidelike=='on') {
+        document.querySelectorAll(".page_counter")[1].remove();
     }
 }
 
@@ -98,7 +208,7 @@ function getUID() {
     return document.querySelector("input[name=_xfToken").value.split(",")[0];
 }
 
-function uniqSave() {
+async function uniqSave() {
     nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
     localcss = document.getElementsByClassName("UsernameCss")[0].value;
     banner = document.getElementsByClassName("BannerCss")[0].value;
@@ -108,12 +218,23 @@ function uniqSave() {
     banner = encodeURIComponent(banner.replace(/\n/g, "").replace(/; +/g, ";"));
     bannertxt = encodeURIComponent(bannertxt.replace(/\n/g, "").replace(/; +/g, ";"));
     svgcss = encodeURIComponent(svgcss.replace(/\n/g, "").replace(/; +/g, ";"));
-    request(`${server}/v5/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}&secure=${document.querySelector("input[name=_xfToken").value.split(",")[0]}`).catch(e => {
+
+    if (secure == 'null') {
+        await setSecure(`${document.querySelector("input[name=_xfToken").value.split(",")[0]+document.querySelector("input[name=_xfToken").value.split(",")[1]}`);
+    }
+    let req = request(`${server}/v5/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}&secure=${secure}`).catch(e => {
         XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
     });
-    XenForo.alert("Успех", 1, 10000);
-    cacheSync();
-    location.reload();
+    if (req != '200' || req != '401') {
+        XenForo.alert("Ошибка синхронизации с сервером, свяжитесь с разработчиком t.me/hasantigiev or zelenka.guru/lays", 1, 10000)
+    }
+    else if (req == '401') {
+        XenForo.alert("Для вашего профиля не найдены ключи авторизации. Cвяжитесь с разработчиком t.me/hasantigiev or zelenka.guru/lays", 1, 10000)
+    }else {
+        XenForo.alert("Успех", 1, 10000);
+        cacheSync();
+        location.reload();
+    }
     document.querySelector("input[type=submit]").click();
 }
 
@@ -130,8 +251,8 @@ async function parseUsernames(usernames) {
 
 async function checkupdate() {
     let response = await request(`${server}/v2/support?ver=${version}`).catch(err => {});
-    if (response == 'no') { return XenForo.alert("Доступна новая версия BetterLZT!\nПерейдите в настройки.", 1, 30000); }
-    if (response == 'dis') { return XenForo.alert("Расширение BetterLZT нуждается в обновлении.\nБез него многие функции могут перестать работать.\nПерейдите в настройки", 1, 10000); }
+    if (response == 'no' || response == 'dis') { return XenForo.alert("Вышла новая версия BetterLZT!\nСписок изменений можно посмотреть в настройках расширения", 1, 5000); }
+    // if (response == 'dis') { return XenForo.alert("Расширение BetterLZT нуждается в обновлении.\nБез него многие функции могут перестать работать.\nПерейдите в настройки", 1, 10000); }
 }
 
 async function cacheSync() {
@@ -148,6 +269,10 @@ async function setCache(e) {
     return await GM.setValue('cache', e);
 }
 
+async function setSecure(e) {
+    return await GM.setValue('secure', e);
+}
+
 async function parseUsername(e) {
     let data = await JSON.parse(await cache);
     try {
@@ -157,7 +282,7 @@ async function parseUsername(e) {
         if (data && !e.classList.contains("custom") ) {
             e.style = data.css;
             e.classList.add("custom");
-                switch (data.status) {
+            switch (data.status) {
                 case "js":
                     e.innerHTML += ` <i title="BetterLZT User" class="fab fa-js-square" style="-webkit-text-fill-color: gold;"></i>`
                     break;
@@ -188,11 +313,31 @@ async function parseUsername(e) {
                 case "cookie":
                     e.innerHTML += ` <i title="BetterLZT User" class="fas fa-cookie" style="-webkit-text-fill-color: #228e5d;"></i>`
                     break;
+                case "admin":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-wrench" style="-webkit-text-fill-color: rgb(150,68,72);"></i> `
+                    break;
+                case "moderate":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-bolt" style="-webkit-text-fill-color: #12470D;"></i> `
+                    break;
+                case "smoderate":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-bolt" style="-webkit-text-fill-color: rgb(46,162,74);"></i> `
+                    break;
+                case "arbitr":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-gavel" style="-webkit-text-fill-color: rgb(255,154,252);"></i> `
+                    break;
+                case "editor":
+                    e.innerHTML += ` <i title="BetterLZT User" class="fas fa-pen" style="-webkit-text-fill-color: rgb(0,135,255);"></i> `
+                    break;
                 case "custom":
                     e.innerHTML += ` ${data.statusCode}`
                     break;
                 default:
                     e.innerHTML += ` <i title="BetterLZT User" class="fa fa-stars"></i>`
+                    break;
+            }
+            switch (data.premium) {
+                case "true":
+                    e.innerHTML += ` <span style="-webkit-text-fill-color: #f5f5f5;padding: 2px 8px;margin: 0px 0px 0px 6px;border-radius: 6px 6px 6px 6px;display: inline-block;background: #ff0076;margin-left: 5px;line-height: 16px;font-size: 12px;"> Premium </span>`;
                     break;
             }
         }
@@ -223,9 +368,10 @@ function setAdblock(e) {
     XenForo.alert('AdBlock настроен', 1, 10000)
 }
 
-function setAvablock(e) {
-    GM.setValue("avablock", e)
-    avablock = e;
+function setLike(e) {
+    GM.setValue("hidelike", e)
+    hidelike = e;
+    XenForo.alert('BetterLZT> Успех!', 1, 10000)
 }
 
 function renderFunctions() {
@@ -234,10 +380,12 @@ function renderFunctions() {
     unsafeWindow.server = server;
     unsafeWindow.cache = cache;
     unsafeWindow.adblock = adblock;
-    unsafeWindow.avablock = avablock;
+    unsafeWindow.hidelike = hidelike;
+    unsafeWindow.secure = secure;
     unsafeWindow.setAdblock = e => setAdblock(e);
     unsafeWindow.setCache = e => setCache(e);
-    unsafeWindow.setAvablock = e => setAvablock(e);
+    unsafeWindow.setSecure = e => setSecure(e);
+    unsafeWindow.setLike = e => setLike(e);
     unsafeWindow.request = request;
     let torender = [uniqSave, ColorSet, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, parseUsernames, cacheSync, blockNotice, BannerStyle, NickStyle];
     let funcs = torender.map(e => e.toString());
@@ -248,8 +396,14 @@ function renderFunctions() {
 }
 
 function isAd(e) {
-    if (adlist.includes(e.innerHTML.toLowerCase()))
-    {
+    if (adlist_w.some(o => e.innerHTML.toLowerCase().includes(o))) {
+        return true;
+    }
+    return false;
+}
+
+function isLink(e) {
+    if (adlist_l.some(o => e.innerHTML.toLowerCase().includes(o))) {
         return true;
     }
     return false;
@@ -281,23 +435,14 @@ async function adBlockDaemon() {
             img.src = 'https://placehold.co/600x600?text=%D0%A0%D0%B5%D0%BA%D0%BB%D0%B0%D0%BC%D0%B0%20%D1%81%D0%BA%D1%80%D1%8B%D1%82%D0%B0';
         }
 
+        if (isLink(e)) {
+            e.classList.add("blocked");
+            e.innerHTML = "Реклама скрыта";
+        }
+
     }
 
     if (users.length < 1 && adblock != 'on') {return;}
-    // if (adnicks) {
-    //     users.forEach(function (f) {
-    //         let nicknamet = e.parentNode.querySelectorAll(".username span");
-    //         nicknamet.forEach(function (d) {
-    //             if (adnicks.includes(d.innerHTML)) {
-    //                 if(d.parentNode.parentNode.nextElementSibling.querySelectorAll(".username span:not(.blocked)")[0]){
-    //                     $(e).parent().parent().parent().find(".img")[0].style.backgroundImage
-    //                 }
-    //             }
-    //         })
-
-    //     })
-    //     document.querySelectorAll("span.userStatus:not(.blocked)").parentNode.querySelector(".username span");
-    // }
 
     users.forEach(function (e) {
         // проверка на рекламу
@@ -307,14 +452,12 @@ async function adBlockDaemon() {
             e.classList.add("blocked");
             // такое говно в будущем стоит переписать =)
             $(e).parent().parent().parent().find(".img")[0].style.backgroundImage = `url('https://placehold.co/600x600?text=%D0%A0%D0%B5%D0%BA%D0%BB%D0%B0%D0%BC%D0%B0%20%D1%81%D0%BA%D1%80%D1%8B%D1%82%D0%B0')`;
-            let adnick = e.parentNode.querySelector(".username span")
-            let replies = e.parentNode.parentNode.nextElementSibling.querySelectorAll(".username span");
-            adnicks.push(adnick);
-            replies.forEach(function (f) {
-                if(f.innerHTML == adnick) {
-                    f.parentNode.parentNode.parentNode.querySelector('.img').style.backgroundImage = `url('https://placehold.co/600x600?text=%D0%A0%D0%B5%D0%BA%D0%BB%D0%B0%D0%BC%D0%B0%20%D1%81%D0%BA%D1%80%D1%8B%D1%82%D0%B0')`;
-                }
-            })
+            return;
+        }
+        if (isLink(e) && adblock == 'on')
+        {
+            e.innerHTML = 'Реклама скрыта';
+            e.classList.add("blocked");
             return;
         }
         return;
@@ -381,28 +524,7 @@ function renderSettings() {
             <h1 class="menu-header-title">Настройки BetterLZT</h1>
             <br>
             <h2 class="menu-header-title">AdBlock <a onclick="blockNotice();" style="text-decoration: underline dotted; animation: pulse 2s infinite;">(?)</a></h2>
-            <div class="theme-switcher">
 
-                <input type="radio" id="mode1-theme" name="themes" ${adblock == 'on' && avablock == 'off' ? 'checked' : ''}/>
-                <label for="mode1-theme" onclick="setAdblock('on'); setAvablock('off');">
-                    <span>
-                        <ion-icon name="moon"></ion-icon> Режим 1
-                    </span>
-                </label>
-                <input type="radio" id="mode2-theme" name="themes" ${adblock == 'on' && avablock == 'on' ? 'checked' : ''}/>
-                <label for="mode2-theme" onclick="setAdblock('on'); setAvablock('on');">
-                    <span>
-                        <ion-icon name="moon"></ion-icon> Режим 2
-                    </span>
-                </label>
-                <input type="radio" id="off-theme" name="themes" ${adblock != 'on' ? 'checked' : ''}/>
-                <label for="off-theme" onclick="setAdblock('off');">
-                    <span>
-                        <ion-icon name="contrast"></ion-icon> Выкл
-                    </span>
-                </label>
-                <span class="slider"></span>
-            </div>
         </div>
         <div class="menu-body">
             <a onclick="uniqSave();">Применить уник</a>
@@ -413,7 +535,7 @@ function renderSettings() {
             <br>
             <a href="https://telegra.ph/BetterLZT-v3-08-04">Подробнее о стилях и AdBlock</a>
             <br>
-            <a href="https://greasyfork.org/ru/scripts/470626-betterlzt">Обновления</a>
+            <a href="https://greasyfork.org/ru/scripts/470626-betterlzt">Обновить расширение/Базы AdBlock'а</a>
         </div>
 
     </div><style>
@@ -556,7 +678,7 @@ ion-icon {
 
 
 async function dialogWindow() {
-    nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
+    nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim().replace(/<[^>]*>/g, ' ').replace(/\s{2,}/g, ' ').trim().replace(" Premium", "").trim();
     let data = await JSON.parse(await cache);
     data = data.users[nickname];
 
@@ -569,23 +691,59 @@ async function dialogWindow() {
     </details>
 
     <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
-        <summary>Кастомизация профиля<br><i class="fas fa-info"></i> Нужен Premium</i></summary>
+        <summary>Кастомизация темы<br><i><i class="fas fa-italic"></i> Нужен Premium</i></summary>
         <div style="margin-top: -25px">
+            <i>Все пользователи расширения при посещении вашего профиля увидят замененный цвет</i>
             <input id="colorbg" placeholder="цвет в формате rgba()"> <a onclick="ColorSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
+
+            <i>Данную тему вы будете видеть на всех страницах форума и маркета</i>
+            </div>
+    </details>
+
+    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>AdBlock</summary>
+        <div style="margin-top: -25px">
+            <a class="button leftButton primary" onclick="setAdblock('on');">Включить</a> <a class="button leftButton primary" onclick="setAdblock('off');">Выключить</a>
         </div>
     </details>
-    <a class="button leftButton primary OverlayTrigger" target="_blank" href="account/uniq/test">Настроить уник</a>
 
-    <a class="button leftButton primary OverlayTrigger" target="_blank" href="https://hasantigiev.t.me">Приобрести Premium</a> <i>* 59 RUB. Бессрочно</i>
+    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>Скрытие счетчика лайков в профиле</summary>
+        <div style="margin-top: -25px">
+            <a class="button leftButton primary" onclick="setLike('on');">Включить</a> <a class="button leftButton primary" onclick="setLike('off');">Выключить</a>
+        </div>
+    </details>
+
+    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>Базы AdBlock и обновления</summary>
+        <div style="margin-top: -25px">
+        <iframe src="https://tv.hasanbet.site/better/hub.php?user=${nickname}&version=${version}" frameborder="0" width="100%"></iframe>
+        </div>
+    </details>
+
+    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>Управление Premium</summary>
+        <div style="margin-top: -25px">
+            <iframe src="https://tv.hasanbet.site/better/prem.php?user=${nickname}" frameborder="0" width="100%"></iframe>
+        </div>
+    </details>
+
+    <a class="button leftButton primary" href="account/uniq/test">Настроить уник</a>
+
+    <a class="button leftButton primary" href="https://greasyfork.org/ru/scripts/470626-betterlzt">Обновления</a>
+
+    <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Приобрести Premium</a>
     `
 
     let html_prem = `
+    <iframe src="https://tv.hasanbet.site/better/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -25px;" height="70px"></iframe>
     <details style="padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
         <summary>Выбор иконки у ника<br><i>Для выбора просто кликните на понравившуюся иконку</i></summary>
         <div style="margin-top: -25px">
         <button onclick="EmojiSet('code')"><i class="fas fa-code"></i></button> <button onclick="EmojiSet('silver')"><i class="fas fa-spinner fa-spin"></i></button>
-        <p>Premium  <i> <i class="fas fa-info"></i> Нужен Premium</i></p> <button onclick="EmojiSet('cookie')"><i class="fas fa-cookie" style="color: #228e5d;"></i></button> <button onclick="EmojiSet('gold')"><i title="BetterLZT User" class="fas fa-spinner-third fa-spin"  style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('js')"><i class="fab fa-js-square" style="-webkit-text-fill-color: gold;"></i></button> <button onclick="EmojiSet('python')"><i class="fab fa-python" style="-webkit-text-fill-color: gold;"></i></button> <button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
-        <a class="button leftButton primary OverlayTrigger" href="https://hasantigiev.t.me">Установить свое</a>
+        <p>Premium  <i> <i class="fas fa-info"></i> Нужен Premium</i></p> <button onclick="EmojiSet('cookie')"><i class="fas fa-cookie" style="color: #228e5d;"></i></button><button onclick="EmojiSet('gold')"><i title="BetterLZT User" class="fas fa-spinner-third fa-spin"  style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('js')"><i class="fab fa-js-square" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('python')"><i class="fab fa-python" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
+        <button onclick="EmojiSet('admin')"><i class="fas fa-wrench" style="color: rgb(150,68,72);"></i></button><button onclick="EmojiSet('moderate')"><i class="fas fa-bolt" style="color: #12470D"></i></button><button onclick="EmojiSet('smoderate')"><i class="fas fa-bolt" style="color: rgb(46,162,74);"></i></button><button onclick="EmojiSet('arbitr')"><i class="fas fa-gavel" style="color: rgb(255,154,252);"></i></button><button onclick="EmojiSet('editor')"><i class="fas fa-pen" style="color: rgb(0,135,255);"></i></button>
+        <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Установить свое</a>
         </div>
     </details>
     ${htmlall}
@@ -605,7 +763,7 @@ async function dialogWindow() {
     </style>
     `;
     return  XenForo.alert(
-        `${html_prem}`, 'BetterLZT'
+        `${html_prem}`, 'BetterLZT v.'+version
     )
 }
 
@@ -636,4 +794,87 @@ async function ColorSet() {
     });
     cacheSync();
     location.reload();
+}
+
+async function currencyRead(url) {
+    // from Vuchaev2015 <3
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+}
+
+async function marketRender() {
+    if (document.location.host != "lzt.market") {return false;}
+    // Курс валют from Vuchaev2015
+    const currencyMap = {
+        'Рубль': 'rub',
+        'Гривна': 'uah',
+        'Тенге': 'kzt',
+        'Бел. рубль': 'byn',
+        'Доллар': 'usd',
+        'Евро': 'eur',
+        'Фунт стерлингов': 'gbp',
+        'Юань': 'cny',
+        'Турецкая лира': 'try'
+    };
+
+    const currencySymbolMap = {
+        'rub': '₽',
+        'uah': '₴',
+        'kzt': '₸',
+        'byn': 'BYN',
+        'usd': '$',
+        'eur': '€',
+        'gbp': '£',
+        'cny': '¥',
+        'try': '₺'
+    };
+    let curr_api = "https://raw.githubusercontent.com/fawazahmed0/currency-api/1/latest/currencies/";
+    const chosenCurrency = document.querySelector("#content > div > div > aside > div > div > div:nth-child(2) > div > div.marketSidebarMenu.bordered-top > div > form > div > a > span").textContent.trim().split(' — ')[0];
+    const currency = currencyMap[chosenCurrency];
+    const currencySymbol = currencySymbolMap[currency];
+    const usd_url = `${curr_api}/usd/${currency}.json`;
+    const eur_url = `${curr_api}/eur/${currency}.json`;
+    const cny_url = `${curr_api}/cny/${currency}.json`;
+
+    const usd_value = await currencyRead(usd_url);
+    const eur_value = await currencyRead(eur_url);
+    const cny_value = await currencyRead(cny_url);
+    const datecurr = usd_value['date'];
+
+    const currencies = [
+        { name: 'USD', value: usd_value[currency].toFixed(2) },
+        { name: 'EUR', value: eur_value[currency].toFixed(2) },
+        { name: 'CNY', value: cny_value[currency].toFixed(2) }
+    ];
+
+    const currencyHtml = currencies.map((currency, index) => `
+    <div class="item">
+        <div class="trimmedTitle">${currency.name}</div>
+        <div class="paymentFooter">
+            <span class="priceBadgeTransparent">${currency.value} ${currencySymbol}</span>
+        </div>
+    </div>
+    ${index === currencies.length - 1 ? '' : '<br>'}
+`).join('');
+
+
+    const html = `
+        <br><div class="secondaryContent">
+            <h3>Курс валют на ${datecurr}</h3>
+            <div class="marketCurrencyApi marketCurrencyItems">
+                <div class="wrapper">
+                    ${currencyHtml}
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.querySelector('#content > div > div > aside > div > div > div:nth-child(3)').innerHTML += html;
+
+    if(window.location.href.includes('goods/add')) {
+        if(document.querySelector(".bbCodeSpoilerContainer")){
+            document.querySelector(".bbCodeSpoilerContainer button").click()
+        }
+    }
 }
