@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BetterLZT
 // @namespace    hasanbet
-// @version      v8
+// @version      v10
 // @description  Free UNIQ??? ADBLOCK????
 // @author       https://zelenka.guru/openresty (openresty)
 // @match        https://zelenka.guru/*
@@ -17,7 +17,7 @@
 
 
 const
-    version    = "2.1",
+    version    = "2.2",
     server     = "http://lzt.hasanbek.ru:8880",
     adlist_w   = ["https://zelenka.guru/threads/5488501", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607 - КАЧЕСТВЕННЫЙ ДИЗАЙН", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam"],
     adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru"];
@@ -31,6 +31,7 @@ let usercss,
     cache,
     adnicks,
     secure,
+    hidelike,
     avablock;
 
 (async function() {
@@ -41,6 +42,7 @@ let usercss,
     avablock  = await GM.getValue("avablock") ? GM.getValue("avablock") : 'null';
     cache     = await GM.getValue("cache") ? GM.getValue("cache") : 'null';
     secure    = await GM.getValue("secure") ? GM.getValue("secure") : 'not';
+    hidelike    = await GM.getValue("hidelike") ? GM.getValue("hidelike") : 'null';
     window.addEventListener("DOMContentLoaded",(event) => {
         profileRender();
         themeRender();
@@ -184,6 +186,13 @@ async function profileRender() {
     //         let nickarea = document.querySelector("h1 span").append(pref);
     //     }
     // }
+    
+
+    // Скрытие лайков
+    
+    if (await hidelike=='on') {
+        document.querySelectorAll(".page_counter")[1].remove();
+    }
 }
 
 function request(url) {
@@ -354,9 +363,10 @@ function setAdblock(e) {
     XenForo.alert('AdBlock настроен', 1, 10000)
 }
 
-function setAvablock(e) {
-    GM.setValue("avablock", e)
-    avablock = e;
+function setLike(e) {
+    GM.setValue("hidelike", e)
+    hidelike = e;
+    XenForo.alert('BetterLZT> Успех!', 1, 10000)
 }
 
 function renderFunctions() {
@@ -365,12 +375,12 @@ function renderFunctions() {
     unsafeWindow.server = server;
     unsafeWindow.cache = cache;
     unsafeWindow.adblock = adblock;
-    unsafeWindow.avablock = avablock;
+    unsafeWindow.hidelike = hidelike;
     unsafeWindow.secure = secure;
     unsafeWindow.setAdblock = e => setAdblock(e);
     unsafeWindow.setCache = e => setCache(e);
     unsafeWindow.setSecure = e => setSecure(e);
-    unsafeWindow.setAvablock = e => setAvablock(e);
+    unsafeWindow.setLike = e => setLike(e);
     unsafeWindow.request = request;
     let torender = [uniqSave, ColorSet, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, parseUsernames, cacheSync, blockNotice, BannerStyle, NickStyle];
     let funcs = torender.map(e => e.toString());
@@ -696,6 +706,13 @@ async function dialogWindow() {
         <summary>AdBlock</summary>
         <div style="margin-top: -25px">
             <a class="button leftButton primary" onclick="setAdblock('on');">Включить</a> <a class="button leftButton primary" onclick="setAdblock('off');">Выключить</a>
+        </div>
+    </details>
+
+    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>Скрытие счетчика лайков в профиле</summary>
+        <div style="margin-top: -25px">
+            <a class="button leftButton primary" onclick="setLike('on');">Включить</a> <a class="button leftButton primary" onclick="setLike('off');">Выключить</a>
         </div>
     </details>
 
