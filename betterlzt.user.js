@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BetterLZT
 // @namespace    hasanbet
-// @version      v7
+// @version      v8
 // @description  Free UNIQ??? ADBLOCK????
 // @author       https://zelenka.guru/openresty (openresty)
 // @match        https://zelenka.guru/*
@@ -17,9 +17,9 @@
 
 
 const
-    version    = "2",
+    version    = "2.1",
     server     = "http://lzt.hasanbek.ru:8880",
-    adlist_w   = ["https://zelenka.guru/threads/5488501", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam"],
+    adlist_w   = ["https://zelenka.guru/threads/5488501", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607 - КАЧЕСТВЕННЫЙ ДИЗАЙН", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam"],
     adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru"];
 
 let usercss,
@@ -869,7 +869,7 @@ async function marketRender() {
 
     if(window.location.href.includes('goods/add')) {
         if(document.querySelector(".bbCodeSpoilerContainer")){
-            document.querySelector(".bbCodeSpoilerContainer").click()
+            document.querySelector(".bbCodeSpoilerContainer button").click()
         }
     }
 }
