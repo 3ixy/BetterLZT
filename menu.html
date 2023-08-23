@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="better-content">
+        <div class="better-m-item">
+            <i class="far fa-smile"></i>
+        </div>
+    </div>
+<div id="menu-main">
+    <div id="better-menu-nav">
+        <div class="better-menu-item" data-to="#menu1">
+            <div class="better-menu-item_icon"> <i class="far fa-cog"></i> </div>
+            <div class="better-menu-item_block">
+                <b>Основные</b>
+                <p>Реклама, секретный вопрос</p>
+            </div>
+        </div>
+        <div class="better-menu-item" data-to="#menu1">
+            <div class="better-menu-item_icon"> <i class="far fa-comment-alt-lines"></i> </div>
+            <div class="better-menu-item_block">
+                <b>Контент</b>
+                <p>Розыгрыши, фильтры</p>
+            </div>
+        </div>
+        <div class="better-menu-item" data-to="#menu1">
+            <div class="better-menu-item_icon"> <i class="far fa-crown"></i> </div>
+            <div class="better-menu-item_block">
+                <b>Привилегии</b>
+                <p>Настройки уника</p>
+            </div>
+        </div>
+        <div class="better-menu-item" data-to="#menu1">
+            <div class="better-menu-item_icon"> <i class="fas fa-pallete"></i> </div>
+            <div class="better-menu-item_block">
+                <b>Редактирование темы</b>
+                <p>Нужен <i>Premium</i></p>
+            </div>
+        </div>
+        <div class="better-menu-item" data-to="#menu1">
+            <div class="better-menu-item_icon"> <i class="fas fa-pallete"></i> </div>
+            <div class="better-menu-item_block">
+                <b>Изменить смайлик</b>
+                <p>Возле ника</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="second-menu" style="display: none;">
+    <div id="tab generaal">
+
+    </div>
+</div>
+    <style>
+
+#better-menu-nav{
+    min-width: min(90vw, 590px);
+    margin-bottom:15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 295px);
+    justify-content: center;
+}
+.better-menu-item{
+    transition:background .2s;
+    cursor:pointer;
+    margin: 5px;
+    display: inline-flex;
+    border-radius:6px;
+    padding:20px 0px 10px 0px;
+    color: rgb(0, 186, 120);;
+    background:rgb(48,48,48);
+    align-items:center
+}
+ .better-menu-item_icon{
+    display:flex;
+    justify-content:center;
+    min-width: 35px;
+    margin-left:5px;
+    margin-right:18px;
+    line-height:100%;
+}
+.better-menu-item_icon i{
+    font-size:28px;
+    color:var(--accent)
+}
+ .better-menu-item:hover{
+    background:rgb(55,55,55);
+}
+.better-menu-item_block h5{
+    font-size:17px;
+    font-weight:600;
+}
+.better-menu-item_block p{
+    opacity: 0.6
+}
+ 
+    </style>
+</body>
+</html>

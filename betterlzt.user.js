@@ -19,7 +19,7 @@
 const
     version    = "2.3",
     server     = "http://lzt.hasanbek.ru:8880",
-    adlist_w   = ["https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/5456926/", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607 - КАЧЕСТВЕННЫЙ ДИЗАЙН", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam"],
+    adlist_w   = ["https://zelenka.guru/threads/5488501", "zelenka.guru/threads/2630352", "https://zelenka.guru/threads/5456926/", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam"],
     adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru"];
 
 let usercss,
@@ -32,6 +32,8 @@ let usercss,
     adnicks,
     secure,
     hidelike,
+    secretph,
+    marketblock,
     avablock;
 
 (async function() {
@@ -43,6 +45,8 @@ let usercss,
     cache     = await GM.getValue("cache") ? GM.getValue("cache") : 'null';
     secure    = await GM.getValue("secure") ? GM.getValue("secure") : 'not';
     hidelike    = await GM.getValue("hidelike") ? GM.getValue("hidelike") : 'null';
+    marketblock    = await GM.getValue("marketblock") ? GM.getValue("marketblock") : 'null';
+    secretph    = await GM.getValue("secretph") ? GM.getValue("secretph") : 'not';
     window.addEventListener("DOMContentLoaded",(event) => {
         profileRender();
         themeRender();
@@ -55,10 +59,19 @@ let usercss,
     })
     setInterval(async () => {
         adBlockDaemon();
+        daemon();
     }, 0);
     setInterval(usernames, 500);
     checkupdate();
 })();
+
+async function daemon() {
+    if (document.querySelector("input[name=secret_answer]:not(.completed)") && await secretph != 'null') {
+        document.querySelector("input[name=secret_answer]:not(.completed)").value = await secretph;
+        document.querySelector("input[name=secret_answer]:not(.completed)").classList.add("completed")
+    }
+    return;
+}
 
 async function themeRender() {
     if (document.querySelector(".avatarScaler")) {return false;}
@@ -335,11 +348,11 @@ async function parseUsername(e) {
                     e.innerHTML += ` <i title="BetterLZT User" class="fa fa-stars"></i>`
                     break;
             }
-            switch (data.premium) {
-                case "true":
-                    e.innerHTML += ` <span style="-webkit-text-fill-color: #f5f5f5;padding: 2px 8px;margin: 0px 0px 0px 6px;border-radius: 6px 6px 6px 6px;display: inline-block;background: #ff0076;margin-left: 5px;line-height: 16px;font-size: 12px;"> Premium </span>`;
-                    break;
-            }
+            // switch (data.premium) {
+            //     case "true":
+            //         e.innerHTML += ` <span style="-webkit-text-fill-color: #f5f5f5;padding: 2px 8px;margin: 0px 0px 0px 6px;border-radius: 6px 6px 6px 6px;display: inline-block;background: #ff0076;margin-left: 5px;line-height: 16px;font-size: 12px;"> Premium </span>`;
+            //         break;
+            // }
         }
         if (e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)") && data.svgcss) {
             let svg = document.createElement('div');
@@ -374,6 +387,19 @@ function setLike(e) {
     XenForo.alert('BetterLZT> Успех!', 1, 10000)
 }
 
+function setSecretph(e) {
+    GM.setValue("secretph", e)
+    hidelike = e;
+    XenForo.alert('BetterLZT> Успех!', 1, 10000);
+}
+
+
+function setMarketblock(e) {
+    GM.setValue("marketblock", e)
+    marketblock = e;
+    XenForo.alert('BetterLZT> Успех!', 1, 10000)
+}
+
 function renderFunctions() {
     unsafeWindow.nickname = nickname;
     unsafeWindow.usercss = usercss;
@@ -381,13 +407,16 @@ function renderFunctions() {
     unsafeWindow.cache = cache;
     unsafeWindow.adblock = adblock;
     unsafeWindow.hidelike = hidelike;
+    unsafeWindow.marketblock = marketblock;
     unsafeWindow.secure = secure;
     unsafeWindow.setAdblock = e => setAdblock(e);
+    unsafeWindow.setMarketblock = e => setMarketblock(e);
     unsafeWindow.setCache = e => setCache(e);
     unsafeWindow.setSecure = e => setSecure(e);
+    unsafeWindow.setSecretph = e => setSecretph(e);
     unsafeWindow.setLike = e => setLike(e);
     unsafeWindow.request = request;
-    let torender = [uniqSave, ColorSet, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, parseUsernames, cacheSync, blockNotice, BannerStyle, NickStyle];
+    let torender = [uniqSave, SecretSet, ColorSet, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, parseUsernames, cacheSync, blockNotice, BannerStyle, NickStyle];
     let funcs = torender.map(e => e.toString());
     let script = document.createElement('script');
     script.appendChild(document.createTextNode(funcs.join("")));
@@ -681,8 +710,45 @@ async function dialogWindow() {
     nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim().replace(/<[^>]*>/g, ' ').replace(/\s{2,}/g, ' ').trim().replace(" Premium", "").trim();
     let data = await JSON.parse(await cache);
     data = data.users[nickname];
+    adblockt = false;
+    marketblockt = false;
+    hideliket = false;
+    if (await adblock == 'on') {
+        adblockt = true;
+    }
+    if (await marketblock == 'on') {
+        marketblockt = true;
+    }
+    if (await hidelike == 'on') {
+        hideliket = true;
+    }
 
     let htmlall = `
+    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>Основные<br><i>Реклама, секретный вопрос</i></summary>
+        <div style="margin-top: -25px">
+            <i>Блокировщик рекламы <input onclick="setAdblock('${adblockt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${adblockt ? 'checked' : ''} /> </i>
+
+            <i>Скрывать продавцов в ЧС <input onclick="setMarketblock('${marketblockt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${marketblockt ? 'checked' : ''} /> </i>
+            
+            <i>Скрывать счетчик лайков в профиле <input onclick="setLike('${hideliket ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${hideliket ? 'checked' : ''} /> </i>
+
+            <i>Секретная фраза</i>
+            <input id="secretph" placeholder="Секретная фраза"> <a onclick="SecretSet()" class="button leftButton primary">Сохранить</a>
+          
+        </div>
+    </details>
+
+    <details style="padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+        <summary>Выбор иконки у ника<br><i>Для выбора просто кликните на понравившуюся иконку</i></summary>
+        <div style="margin-top: -25px">
+        <button onclick="EmojiSet('code')"><i class="fas fa-code"></i></button> <button onclick="EmojiSet('silver')"><i class="fas fa-spinner fa-spin"></i></button>
+        <p>Premium  <i> <i class="fas fa-info"></i> Нужен Premium</i></p> <button onclick="EmojiSet('cookie')"><i class="fas fa-cookie" style="color: #228e5d;"></i></button><button onclick="EmojiSet('gold')"><i title="BetterLZT User" class="fas fa-spinner-third fa-spin"  style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('js')"><i class="fab fa-js-square" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('python')"><i class="fab fa-python" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
+        <button onclick="EmojiSet('admin')"><i class="fas fa-wrench" style="color: rgb(150,68,72);"></i></button><button onclick="EmojiSet('moderate')"><i class="fas fa-bolt" style="color: #12470D"></i></button><button onclick="EmojiSet('smoderate')"><i class="fas fa-bolt" style="color: rgb(46,162,74);"></i></button><button onclick="EmojiSet('arbitr')"><i class="fas fa-gavel" style="color: rgb(255,154,252);"></i></button><button onclick="EmojiSet('editor')"><i class="fas fa-pen" style="color: rgb(0,135,255);"></i></button>
+        <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Установить свое</a>
+        </div>
+    </details>
+
     <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
         <summary>Фон профиля</summary>
         <div style="margin-top: -25px">
@@ -700,21 +766,7 @@ async function dialogWindow() {
             </div>
     </details>
 
-    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
-        <summary>AdBlock</summary>
-        <div style="margin-top: -25px">
-            <a class="button leftButton primary" onclick="setAdblock('on');">Включить</a> <a class="button leftButton primary" onclick="setAdblock('off');">Выключить</a>
-        </div>
-    </details>
-
-    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
-        <summary>Скрытие счетчика лайков в профиле</summary>
-        <div style="margin-top: -25px">
-            <a class="button leftButton primary" onclick="setLike('on');">Включить</a> <a class="button leftButton primary" onclick="setLike('off');">Выключить</a>
-        </div>
-    </details>
-
-    <details style="margin-top: -25px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
+    <details style="margin-top: -5px; padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
         <summary>Базы AdBlock и обновления</summary>
         <div style="margin-top: -25px">
         <iframe src="https://tv.hasanbet.site/better/hub.php?user=${nickname}&version=${version}" frameborder="0" width="100%"></iframe>
@@ -737,15 +789,7 @@ async function dialogWindow() {
 
     let html_prem = `
     <iframe src="https://tv.hasanbet.site/better/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -25px;" height="70px"></iframe>
-    <details style="padding: 10px; border-radius: 6px; background-color: rgb(54, 54, 54);">
-        <summary>Выбор иконки у ника<br><i>Для выбора просто кликните на понравившуюся иконку</i></summary>
-        <div style="margin-top: -25px">
-        <button onclick="EmojiSet('code')"><i class="fas fa-code"></i></button> <button onclick="EmojiSet('silver')"><i class="fas fa-spinner fa-spin"></i></button>
-        <p>Premium  <i> <i class="fas fa-info"></i> Нужен Premium</i></p> <button onclick="EmojiSet('cookie')"><i class="fas fa-cookie" style="color: #228e5d;"></i></button><button onclick="EmojiSet('gold')"><i title="BetterLZT User" class="fas fa-spinner-third fa-spin"  style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('js')"><i class="fab fa-js-square" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('python')"><i class="fab fa-python" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
-        <button onclick="EmojiSet('admin')"><i class="fas fa-wrench" style="color: rgb(150,68,72);"></i></button><button onclick="EmojiSet('moderate')"><i class="fas fa-bolt" style="color: #12470D"></i></button><button onclick="EmojiSet('smoderate')"><i class="fas fa-bolt" style="color: rgb(46,162,74);"></i></button><button onclick="EmojiSet('arbitr')"><i class="fas fa-gavel" style="color: rgb(255,154,252);"></i></button><button onclick="EmojiSet('editor')"><i class="fas fa-pen" style="color: rgb(0,135,255);"></i></button>
-        <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Установить свое</a>
-        </div>
-    </details>
+
     ${htmlall}
 
     <style>
@@ -784,6 +828,12 @@ async function BgSet() {
     });
     cacheSync();
     location.reload();
+}
+
+async function SecretSet() {
+    nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
+    secretph = document.querySelector("#secretph").value;
+    setSecretph(secretph);
 }
 
 async function ColorSet() {
@@ -870,11 +920,24 @@ async function marketRender() {
         </div>
     `;
 
-    document.querySelector('#content > div > div > aside > div > div > div:nth-child(3)').innerHTML += html;
+    document.querySelector('#content > div > div > aside > div > div > div:nth-child(2)').innerHTML += html;
 
     if(window.location.href.includes('goods/add')) {
         if(document.querySelector(".bbCodeSpoilerContainer")){
             document.querySelector(".bbCodeSpoilerContainer button").click()
         }
+    }
+
+    // <div class="section">
+	// 	<a href="balance/deposit/problem" class="depositProblemButton button dark full large button" style="border-radius: 10px;">Не пришли деньги?</a>
+	// </div>
+    // let marketsettings = document.createElement("div")
+    // marketsettings.classList.add("section")
+    // marketsettings.innerHTML = `<a class="depositProblemButton button dark full large button" style="border-radius: 10px;">Настройки BetterLZT</a>`
+    if (marketblock == 'on') {
+        alerts = document.querySelectorAll(".itemIgnored");
+        alerts.forEach(function (e){
+            e.remove();
+        })
     }
 }
