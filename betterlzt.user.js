@@ -11,13 +11,14 @@
 // @grant        GM.getValue
 // @grant        unsafeWindow
 // @connect      lzt.hasanbek.ru
+// @connect      tv.hasanbet.site
 // @run-at       document-body
 // @license MIT
 // ==/UserScript==
 
 
 const
-    version    = "2.31",
+    version    = "2.32",
     server     = "http://lzt.hasanbek.ru:8880",
     adlist_w   = ["https://zelenka.guru/threads/5488501", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://zelenka.guru/threads/5456926/", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam"],
     adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru"];
@@ -75,6 +76,49 @@ async function daemon() {
     if (document.querySelector("input[name=secret_answer]:not(.completed)") && await secretph != 'null') {
         document.querySelector("input[name=secret_answer]:not(.completed)").value = await secretph;
         document.querySelector("input[name=secret_answer]:not(.completed)").classList.add("completed")
+    }
+
+    // Сканирование кнопок в треде
+    if (document.location.pathname.includes('threads') && document.querySelector("blockquote")) {
+        if (document.querySelector("blockquote").innerHTML.trim().includes("betterfast")) {
+            let str = document.querySelector("blockquote").innerHTML.trim();
+            let arr = str.split('=');
+            let value = arr[1].split(']')[0];
+
+            let fastinfo = await request(`https://tv.hasanbet.site/better/fast.php?id=${value}`)
+            try {
+                let jsonfast = JSON.parse(fastinfo);
+                
+            } catch (error) {
+                document.querySelector("blockquote").innerHTML = "Возникла ошибка"
+            }
+        }
+
+        if (document.querySelector("blockquote").innerHTML.trim().includes("betterver")) {
+
+            let fastinfo = await request(`https://tv.hasanbet.site/better/ver.php?version=${version}`)
+            try {
+                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterver\](.*?)\[\/betterver\]/g, await fastinfo);
+                
+            } catch (error) {
+                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterver\](.*?)\[\/betterver\]/g, "ERROR");
+            }
+        }
+
+        if (document.querySelector("blockquote").innerHTML.trim().includes("betterjs")) {
+            let str = document.querySelector("blockquote").innerHTML.trim();
+            let arr = str.split('=');
+            let value = arr[1].split(']')[0];
+            var match = str.match(/\](.*?)\[/);
+            let atobed = window.btoa(`https://tv.hasanbet.site/better/js/${value}`);
+            let response = await request(`https://tv.hasanbet.site/better/js/${value}`);
+            try {
+                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterjs=.*?\].*?\[\/betterjs\]/g, `<a onclick="eval(`+response+`)">${match[1]}</a>`);
+                
+            } catch (error) {
+                document.querySelector("blockquote").innerHTML = "Возникла ошибка: "+error;
+            }
+        }
     }
     return;
 }
@@ -455,6 +499,7 @@ function renderFunctions() {
     unsafeWindow.usercss = usercss;
     unsafeWindow.server = server;
     unsafeWindow.cache = cache;
+    unsafeWindow.version = version;
     unsafeWindow.adblock = adblock;
     unsafeWindow.hidelike = hidelike;
     unsafeWindow.marketblock = marketblock;
