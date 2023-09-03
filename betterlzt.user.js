@@ -12,16 +12,17 @@
 // @grant        unsafeWindow
 // @connect      lzt.hasanbek.ru
 // @connect      tv.hasanbet.site
+// @connect      localhost
 // @run-at       document-body
 // @license MIT
 // ==/UserScript==
 
 
 const
-    version    = "2.32",
+    version    = "2.4",
     server     = "http://lzt.hasanbek.ru:8880",
-    adlist_w   = ["https://zelenka.guru/threads/5488501", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://zelenka.guru/threads/5456926/", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam"],
-    adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru"];
+    adlist_w   = ["https://zelenka.guru/threads/5488501", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://zelenka.guru/threads/5456926/", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
+    adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru", "t.me"];
 
 let usercss,
     adblock,
@@ -73,6 +74,7 @@ let usercss,
 })();
 
 async function daemon() {
+    let nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
     if (document.querySelector("input[name=secret_answer]:not(.completed)") && await secretph != 'null') {
         document.querySelector("input[name=secret_answer]:not(.completed)").value = await secretph;
         document.querySelector("input[name=secret_answer]:not(.completed)").classList.add("completed")
@@ -84,43 +86,40 @@ async function daemon() {
             let str = document.querySelector("blockquote").innerHTML.trim();
             let arr = str.split('=');
             let value = arr[1].split(']')[0];
+            let fastinfo = await JSON.parse(await request(`${server}/v6/fast?id=${value}`));
 
-            let fastinfo = await request(`https://tv.hasanbet.site/better/fast.php?id=${value}`)
-            try {
-                let jsonfast = JSON.parse(fastinfo);
-                
-            } catch (error) {
-                document.querySelector("blockquote").innerHTML = "Возникла ошибка"
-            }
+       
+                let text = `
+                <h3>${fastinfo.title} | ${fastinfo.ammount} RUB</h3>
+                ${fastinfo.totalusers} / ${fastinfo.maxusers} <progress value="${fastinfo.totalusers}" max="${fastinfo.maxusers}">${fastinfo.totalusers} / ${fastinfo.maxusers}</progress>
+                ${fastinfo.needprem ? '<i>Для участия требуется подписка BetterLZT+</i>' : ''}
+                <br>
+                ${fastinfo.users[nickname] ? 'Вы уже приняли участие в данном розыгрыше' : `<a onclick="doFast(${fastinfo.id})">Принять участие</a>`}
+                `
+                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterfast=.*?\].*?\[\/betterfast\]/g, text);
+           
         }
 
-        if (document.querySelector("blockquote").innerHTML.trim().includes("betterver")) {
-
-            let fastinfo = await request(`https://tv.hasanbet.site/better/ver.php?version=${version}`)
-            try {
-                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterver\](.*?)\[\/betterver\]/g, await fastinfo);
-                
-            } catch (error) {
-                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterver\](.*?)\[\/betterver\]/g, "ERROR");
-            }
-        }
-
-        if (document.querySelector("blockquote").innerHTML.trim().includes("betterjs")) {
-            let str = document.querySelector("blockquote").innerHTML.trim();
-            let arr = str.split('=');
-            let value = arr[1].split(']')[0];
-            var match = str.match(/\](.*?)\[/);
-            let atobed = window.btoa(`https://tv.hasanbet.site/better/js/${value}`);
-            let response = await request(`https://tv.hasanbet.site/better/js/${value}`);
-            try {
-                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterjs=.*?\].*?\[\/betterjs\]/g, `<a onclick="eval(`+response+`)">${match[1]}</a>`);
-                
-            } catch (error) {
-                document.querySelector("blockquote").innerHTML = "Возникла ошибка: "+error;
-            }
-        }
+      
     }
     return;
+}
+
+async function doFast(id) {
+    let nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
+    let answer = await request(`${server}/v6/dofast?id=${id}&nick=${nickname}`)
+    if (answer == "200") {
+        document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML + `<br> Вы успешно приняли участие`;
+    }
+    else if (answer == "201") {
+        XenForo.alert("Вы уже приняли участие в розыгрыше", 1, 10000)
+    }
+    else if (answer == "202") {
+        XenForo.alert("Увы, вы неуспели принять участие в розыгрыше", 1, 10000)
+    }
+    else if (answer == "403") {
+        XenForo.alert("Для участия в данном розыгрыше нужен Premium", 1, 10000)
+    }
 }
 
 async function themeRender() {
@@ -300,12 +299,12 @@ async function uniqSave() {
     let req = request(`${server}/v5/new?user=${nickname}&css=${css}&banner=${banner}&bannertxt=${bannertxt}&svgcss=${svgcss}&secure=${secure}`).catch(e => {
         XenForo.alert("Ошибка синхронизации с сервером, попробуйте еще раз", 1, 10000)
     });
-    if (req != '200' || req != '401') {
+    if (req != '200' && req != '401') {
         XenForo.alert("Ошибка синхронизации с сервером, свяжитесь с разработчиком t.me/hasantigiev or zelenka.guru/lays", 1, 10000)
     }
-    else if (req == '401') {
+    if (req == '401') {
         XenForo.alert("Для вашего профиля не найдены ключи авторизации. Cвяжитесь с разработчиком t.me/hasantigiev or zelenka.guru/lays", 1, 10000)
-    }else {
+    }else if (req == '200') {
         XenForo.alert("Успех", 1, 10000);
         cacheSync();
         location.reload();
@@ -517,7 +516,7 @@ function renderFunctions() {
     unsafeWindow.setSimps = e => setSimps(e);
     unsafeWindow.setAva = e => setAva(e);
     unsafeWindow.request = request;
-    let torender = [uniqSave, simpsSet, SecretSet, ColorSet, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, parseUsernames, cacheSync, blockNotice, BannerStyle, NickStyle];
+    let torender = [uniqSave, simpsSet, doFast, SecretSet, ColorSet, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, parseUsernames, cacheSync, blockNotice, BannerStyle, NickStyle];
     let funcs = torender.map(e => e.toString());
     let script = document.createElement('script');
     script.appendChild(document.createTextNode(funcs.join("")));
@@ -552,7 +551,28 @@ async function adBlockDaemon() {
         ads.forEach(function (e){
             e.remove();
         })
-    }
+	}
+	// проверка на рекламу в минипрофиле
+	
+	if (document.querySelector(".userTitleBlurb h4") && adblock == 'on')
+	{
+		let e = document.querySelector(".userTitleBlurb h4");
+		let img = document.querySelector(".avatarBox span.img");
+		if (isAd(e)) {
+			e.classList.add("blocked");
+			e.innerHTML = "Реклама скрыта";
+			img.style.backgroundImage = `url('https://placehold.co/600x600?text=%D0%A0%D0%B5%D0%BA%D0%BB%D0%B0%D0%BC%D0%B0%20%D1%81%D0%BA%D1%80%D1%8B%D1%82%D0%B0')`;
+		}
+	}
+	if (document.querySelector(".userTitleBlurb h4") && adblock == 'on')
+	{
+		let e = document.querySelector(".userTitleBlurb h4");
+		let img = document.querySelector(".avatarBox span.img");
+		if (isLink(e)) {
+			e.classList.add("blocked");
+			e.innerHTML = "Реклама скрыта";
+		}
+	}
 
     // Проверка статуса на юзер пейдже
     if (document.querySelector(".current_text:not(.blocked)") && adblock == 'on')
@@ -1074,12 +1094,12 @@ async function marketRender() {
     // let marketsettings = document.createElement("div")
     // marketsettings.classList.add("section")
     // marketsettings.innerHTML = `<a class="depositProblemButton button dark full large button" style="border-radius: 10px;">Настройки BetterLZT</a>`
-    if (marketblock == 'on') {
-        alerts = document.querySelectorAll(".itemIgnored");
+    if (await marketblock == 'on') {
+		alerts = document.querySelectorAll(".itemIgnored");
         alerts.forEach(function (e){
             e.remove();
-        })
-    }
+        })    
+	}
 
     if(document.querySelector(".sidebarUserAvatar") && await avamarket == 'on') {
         document.querySelector(".sidebarUserAvatar").remove();

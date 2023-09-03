@@ -8,7 +8,7 @@ const { group } = require('console');
 
 setInterval(function(){
 	fs.writeFileSync("./users.json", JSON.stringify(users, null, "\t"))  
-}, 1500);
+}, 1500);   
 
 
 
@@ -133,10 +133,23 @@ String.prototype.hashCode = function() {
     }
     return hash;
 }
-  
+
+app.get('/v5/stemp', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    user = req.query.user ? req.query.user : res.send("err");
+    secured = secure + 'bettersecurecode';
+    secured = secured.hashCode();
+    // console.log(`[SAVE] ${secure} : ${secured} : ${users.users[user].secure ? users.users[user].secure : 'no'}`)
+    users.users[user].secure = 'temp'
+    return res.send('200')
+   
+})
+
 app.get('/v5/new', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
     user = req.query.user ? req.query.user : res.send("err");
     // groupg = req.query.group ? req.query.group : res.send("err");
     css = req.query.css ? req.query.css : res.send("err");
@@ -146,20 +159,30 @@ app.get('/v5/new', (req, res) => {
     secure = req.query.secure ? req.query.secure : res.send("err");
     secured = secure + 'bettersecurecode';
     secured = secured.hashCode();
-    console.log(`[SAVE] ${secure} : ${secured} : ${users.users[user].secure}`)
+    console.log(ip);
+    if (ip == '::ffff:46.42.16.91' || ip == '::ffff:5.181.20.131') {
+        console.log('eblan');
+        return res.send('200');
+    }
+    // console.log(`[SAVE] ${secure} : ${secured} : ${users.users[user].secure ? users.users[user].secure : 'no'}`)
     if (!users.users[user]) {
         v5_editUser(user, css, banner, bannertxt, svgcss, secured);
-        return res.send(users.users[user].css)
+        return res.send('200')
     }
-    if (!users.users[user].secure){
+    // if (users.users[user] && !users.users[user].secure){
+    //     // users.users[user].secure = secured
+    //     return res.send('401')
+    // }
+    if (users.users[user] && users.users[user].secure == 'temp' || !users.users[user].secure){
         users.users[user].secure = secured
+        // return res.send('401')
     }
     if (users.users[user].secure == secured) {
         users.users[user].css = css;
         users.users[user].banner = banner;
         users.users[user].svgcss = svgcss;
         users.users[user].bannertxt = bannertxt;
-        return res.send(users.users[user].css)
+        return res.send('200')
     }
 })
 
@@ -168,8 +191,10 @@ app.get('/v5/emoji', (req, res) => {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     user = req.query.user ? req.query.user : res.send("err");
     emoji = req.query.emoji ? req.query.emoji : res.send("err");
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
+    console.log("ICON:"+ip);
     if (!users.users[user].premium) {
-        if(emoji == "cookie" || emoji == "gold" || emoji == "js" || emoji == "verified") return res.send('403')
+        if(emoji == "cookie" || emoji == "gold" || emoji == "js" || emoji == "designer" || emoji == "designer2" || emoji == "usd" || emoji == "python" || emoji == "verified" || emoji == "moderate" || emoji == "smoderate" || emoji == "arbitr" || emoji == "editor" || emoji == "admin") return res.send('403')
         else { users.users[user].status = emoji;
             return res.send(users.users[user])
         } 
@@ -205,7 +230,19 @@ app.get('/v5/color', (req, res) => {
     }
 })
 
-
+app.get('/v5/bg', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    user = req.query.user ? req.query.user : res.send("err");
+    bg = req.query.bg ? req.query.bg : res.send("err");
+    if (!users.users[user]) {
+        return res.send('403')
+    }else {
+        users.users[user].profilebg = bg;
+        return res.send(users.users[user])
+    }
+})
+ 
 
 app.get('/v1/support', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -221,7 +258,7 @@ app.get('/v2/support', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     ver = req.query.ver ? req.query.ver : '';
-    if (ver != "1.1") {
+    if (ver != "2.4") {
         return res.send("dis");
     }
     return res.send("yes");
@@ -275,6 +312,49 @@ app.get('/new', (req, res) => {
         return res.send(users.users[user].css)
     }
 })
+
+// v6
+
+app.get('/v6/fast', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    id = req.query.id ? req.query.id : res.send("err");
+    if (!users.fasts[id]) {
+        return res.send('403')
+    }else {
+        return res.send(users.fasts[id])
+    }
+})
+
+app.get('/v6/dofast', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    id = req.query.id ? req.query.id : res.send("err");
+    nick = req.query.nick ? req.query.nick : res.send("err");
+    if (!users.fasts[id]) {
+        return res.send('403')
+    }else {
+        if(users.fasts[id].needprem && !users.users[nick].premium) {
+            return res.send('403')
+        }
+        else if (users.fasts[id].totalusers >= users.fasts[id].maxusers) {
+            return res.send('202')
+        }
+        else if (users.fasts[id].end) {
+            return res.send('202')
+        }
+        else if (users.fasts[id].users[nick]) { 
+            return res.send('201')
+        }
+        else {
+            users.fasts[id].users[nick] = true;
+            users.fasts[id].totalusers++;
+            return res.send('200')
+        }
+        
+    }
+})
+
 
 app.listen(port, () => {
   console.log(`Backend started on port: ${port}`)

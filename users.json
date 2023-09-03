@@ -11,5 +11,18 @@
 			"bannertxt": "BetterLZT <3",
 			"svgcss": "border-radius: 6px;background: url('https://media1.giphy.com/media/3o7522WIg2FkHbCHvO/giphy.gif') center center;text-shadow: 0px 0px 3px #7a00ff, 0px 1px 0px gray, 1px 2px 0px lime, 1px 3px 0px blue;color: white"
 		}
+	},
+	"fasts": {
+		"1": {
+			"title": "Test",
+			"id": 1,
+			"ammount": "50",
+			"totalusers": 2,
+			"maxusers": 10,
+			"users": {
+				"[object Object]": true,
+				"openresty": true
+			}
+		}
 	}
 }
