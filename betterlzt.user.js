@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BetterLZT
 // @namespace    hasanbet
-// @version      v30
+// @version      v31
 // @description  Сделай свой жизнь на LolzTeam проще!
 // @author       https://zelenka.guru/lays (openresty)
 // @match        https://zelenka.guru/*
@@ -19,12 +19,13 @@
 
 
 const
-    version    = "3",
+    version    = "3.1",
     blzt_link_tos = "https://zelenka.guru/threads/5816508/",
     blzt_link_trust = "https://zelenka.guru/threads/5821466/",
     server     = "http://lzt.hasanbek.ru:8880",
-    adlist_w   = ["zelenka.guru/threads/3649746", "https://zelenka.guru/threads/5488501", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://zelenka.guru/threads/5456926/", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
-    adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru", "t.me"];
+    adlist_w   = ["zelenka.guru/threads/3649746", "https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/4871985/", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
+    adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru", "t.me"],
+    adlist_white = ["https://zelenka.guru/threads/5456926/"];
 
 let usercss,
     adblock,
@@ -62,9 +63,9 @@ let usercss,
             XenForo.alert(`Благодарим за установку расширения!\nПеред началом использования прочтите соглашение: ${blzt_link_tos}`, "[BetterLZT] Добро пожаловать!");
             await GM.setValue("firstrun", "ok");
         }
-        if (await GM.getValue("firsttrust") != "ok" && GM.getValue("firstrun") == "ok") {
-            XenForo.alert(`<h1>Рады представить новый функционал - Фактор Доверия.</h1><h3>Что это?</h3>- Специальный алгоритм определяет уровень доверия к пользователю по шкале, от 0 до 100. <h3>Подробнее в статье: ${blzt_link_trust}</h3>`, "[BetterLZT] Фактор доверия");
-            await GM.setValue("firsttrust", "ok")
+        if (await GM.getValue("firsttrust2") != "ok") {
+            XenForo.alert(`<h1>Переработка алгоритма "Фактора Доверия".</h1><h3>Что это?</h3>- Специальный алгоритм определяет уровень доверия к пользователю по шкале, от 0 до 100. Нормальное значение среднего пользователя = 35 и выше. Функция на стадии бета-тестирования, все предложения и недочеты просим присылать в тему указанную ниже<h3>Переработка алгоритма</h3>- Уровень доверия каждого пользователя, который имел средний рейтинг ≥ 5 был повышен. Однако, рейтинг некоторых пользователей остался неизменным, в таком случае можно обратиться к разработчику и уточнить, объективная ли это оценка, или же алогритм выставил неверную оценку. <br><b>Хотите сравнить рейтинг До и После?</b> На страничке нашего расширение в 'GreasyFork' можно откатиться до предыдущей версии (v30), сверить новый и старый рейтинг, а затем установить вновь новую версию<br><b>Спасибо за запуск BetterLZT, именно Вы помогаете нам становиться нам лучше с каждым днем.</b> <h3>Подробнее в статье: ${blzt_link_trust}</h3>`, "Фактор доверия 'BetterLZT'.");
+            await GM.setValue("firsttrust2", "ok")
         }
         profileRender();
         themeRender();
@@ -187,7 +188,7 @@ async function profileRender() {
     let data = await JSON.parse(await cache);
     data = data.users[usernickt];
     if (data) {
-        if (data.profilebg != 'null') {
+        if (data.profilebg) {
             document.querySelector("body").style = `
             background-size: cover;
             background-position: center;
@@ -289,13 +290,13 @@ async function profileRender() {
     let blzt_puser_nick = document.querySelector("h1.username span"),
         blzt_puser_nick_val = blzt_puser_nick.innerHTML.replace(/ <i.*?>.*?<\/i>/ig,''),
         blzt_puser_role = blzt_puser_nick.classList,
-        blzt_puser_deposit = parseInt(document.querySelector('h3.amount').innerHTML.replace('₽','').replace(' ',''));
+        blzt_puser_deposit = parseInt(document.querySelector('h3.amount').innerHTML.replaceAll(' ','').replace('₽',''));
         
     if (blzt_puser_deposit > 10000) {
-        blzt_trust_val+=7;
+        blzt_trust_val+=10;
     }   
     if (blzt_puser_deposit > 20000) {
-        blzt_trust_val+=5;
+        blzt_trust_val+=10;
     }   
     if (blzt_puser_deposit > 50000) {
         blzt_trust_val+=10;
@@ -307,28 +308,44 @@ async function profileRender() {
         blzt_trust_val+=10;
     }   
     if (blzt_puser_deposit > 300000) {
-        blzt_trust_val+=7;
+        blzt_trust_val+=15;
+    }   
+    if (blzt_puser_deposit > 500000) {
+        blzt_trust_val+=10;
+    }   
+    if (blzt_puser_deposit > 700000) {
+        blzt_trust_val+=20;
     }   
 
+
+    if (blzt_puser_likes > 100) {
+        blzt_trust_val+=5;
+    }
     if (blzt_puser_likes > 200) {
-        blzt_trust_val+=4;
+        blzt_trust_val+=10;
     }
     if (blzt_puser_likes > 500) {
-        blzt_trust_val+=7;
+        blzt_trust_val+=10;
     }
     if (blzt_puser_likes > 1000) {
-        blzt_trust_val+=15;
-    }
-    if (blzt_puser_likes > 3000) {
-        blzt_trust_val+=5;
-    }
-    if (blzt_puser_likes > 6000) {
-        blzt_trust_val+=5;
-    }
-    if (blzt_puser_likes > 10000) {
-        blzt_trust_val+=7;
+        blzt_trust_val+=13;
     }
     if (blzt_puser_likes > 2000) {
+        blzt_trust_val+=7;
+    }
+    if (blzt_puser_likes > 3000) {
+        blzt_trust_val+=10;
+    }
+    if (blzt_puser_likes > 5000) {
+        blzt_trust_val+=10;
+    }
+    if (blzt_puser_likes > 10000) {
+        blzt_trust_val+=15;
+    }
+    if (blzt_puser_likes > 20000)   {
+        blzt_trust_val+=10;
+    }
+    if (blzt_puser_likes > 40000) {
         blzt_trust_val+=15;
     }
 
@@ -352,7 +369,7 @@ async function profileRender() {
         blzt_trust_val+=35;
     }
     if (blzt_puser_role.contains("style349")) {
-        blzt_trust_val+=15;
+        blzt_trust_val+=20;
     }
     if (blzt_puser_role.contains("style350")) {
         blzt_trust_val+=40;
@@ -362,6 +379,9 @@ async function profileRender() {
     }
     if (blzt_puser_role.contains("style7")) {
         blzt_trust_val+=30;
+    }
+    if (blzt_puser_role.contains("style26")) {
+        blzt_trust_val+=10;
     }
     if (blzt_puser_role.contains("banned")) {
         blzt_trust_val=0;
@@ -391,7 +411,7 @@ async function profileRender() {
             </h3>
 
             <h3 style="margin-bottom: 0px; font-size: 18px !important;" class="amount ${blzt_trust_val > 35 ? 'mainc' : 'redc'}">
-                ${blzt_trust_val} / 100
+            ≈ ${blzt_trust_val} / 100
             </h3>
         </div>
     </div>`;
@@ -436,7 +456,8 @@ async function uniqSave() {
     }
     if (req == '401') {
         XenForo.alert("Для вашего профиля не найдены ключи авторизации. Cвяжитесь с разработчиком t.me/hasantigiev or zelenka.guru/lays", 1, 10000)
-    }else if (req == '200') {
+    }
+    if (req == '200') {
         XenForo.alert("Успех", 1, 10000);
         cacheSync();
         location.reload();
@@ -666,14 +687,14 @@ function renderFunctions() {
 }
 
 function isAd(e) {
-    if (adlist_w.some(o => e.innerHTML.toLowerCase().includes(o))) {
+    if (adlist_w.some(o => e.innerHTML.toLowerCase().includes(o)) && !adlist_white.some(o => e.innerHTML.toLowerCase().includes(o))) {
         return true;
     }
     return false;
 }
 
 function isLink(e) {
-    if (adlist_l.some(o => e.innerHTML.toLowerCase().includes(o))) {
+    if (adlist_l.some(o => e.innerHTML.toLowerCase().includes(o)) && !adlist_white.some(o => e.innerHTML.toLowerCase().includes(o))) {
         return true;
     }
     return false;
