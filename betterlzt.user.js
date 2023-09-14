@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         BetterLZT
 // @namespace    hasanbet
-// @version      v12
-// @description  Free UNIQ??? ADBLOCK????
-// @author       https://zelenka.guru/openresty (openresty)
+// @version      v30
+// @description  Сделай свой жизнь на LolzTeam проще!
+// @author       https://zelenka.guru/lays (openresty)
 // @match        https://zelenka.guru/*
 // @match        https://lzt.market/*
 // @grant        GM_xmlhttpRequest
@@ -19,9 +19,11 @@
 
 
 const
-    version    = "2.4",
+    version    = "3",
+    blzt_link_tos = "https://zelenka.guru/threads/5816508/",
+    blzt_link_trust = "https://zelenka.guru/threads/5821466/",
     server     = "http://lzt.hasanbek.ru:8880",
-    adlist_w   = ["https://zelenka.guru/threads/5488501", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://zelenka.guru/threads/5456926/", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
+    adlist_w   = ["zelenka.guru/threads/3649746", "https://zelenka.guru/threads/5488501", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://zelenka.guru/threads/5456926/", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
     adlist_l   = ["threads", "members", "lolz.live", "zelenka.guru", "t.me"];
 
 let usercss,
@@ -55,7 +57,15 @@ let usercss,
     theme       = await GM.getValue("theme") ? GM.getValue("theme") : 'null';
     simps       = await GM.getValue("simps") ? GM.getValue("simps") : 'null';
     avamarket   = await GM.getValue("avamarket") ? GM.getValue("avamarket") : 'null';
-    window.addEventListener("DOMContentLoaded",(event) => {
+    window.addEventListener("DOMContentLoaded",async (event) => {
+        if (await GM.getValue("firstrun") != "ok") {
+            XenForo.alert(`Благодарим за установку расширения!\nПеред началом использования прочтите соглашение: ${blzt_link_tos}`, "[BetterLZT] Добро пожаловать!");
+            await GM.setValue("firstrun", "ok");
+        }
+        if (await GM.getValue("firsttrust") != "ok" && GM.getValue("firstrun") == "ok") {
+            XenForo.alert(`<h1>Рады представить новый функционал - Фактор Доверия.</h1><h3>Что это?</h3>- Специальный алгоритм определяет уровень доверия к пользователю по шкале, от 0 до 100. <h3>Подробнее в статье: ${blzt_link_trust}</h3>`, "[BetterLZT] Фактор доверия");
+            await GM.setValue("firsttrust", "ok")
+        }
         profileRender();
         themeRender();
         renderFunctions();
@@ -200,49 +210,52 @@ async function profileRender() {
 
     // плашка с депозитом
 
-    let deposit = parseInt(document.querySelector('h3.amount').innerHTML.replace('₽','').replace(' ',''));
-    if (deposit >= 10000 && deposit < 50000) {
-        let pref = document.createElement('span');
-        pref.style = `color: #f5f5f5;padding: 2px 8px;
-        margin: 0px 0px 0px 6px;
-        border-radius: 0px 6px 6px 0px;
-        display: inline-block;
-        margin-left: 25px;
-        background: #47626f;
-        line-height: 16px;
-        font-size: 12px;`;
-        pref.innerHTML = "Депозит";
-        pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
-        let nickarea = document.querySelector("h1 span").append(pref);
-    }
-    if (deposit >= 50000 && deposit < 100000) {
-        let pref = document.createElement('span');
-        pref.style = `color: #f5f5f5;padding: 2px 8px;
-        margin: 0px 0px 0px 6px;
-        border-radius: 0px 6px 6px 0px;
-        display: inline-block;
-        margin-left: 25px;
-        background: #8a315d;
-        line-height: 16px;
-        font-size: 12px;`;
-        pref.innerHTML = "Депозит";
-        pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
-        let nickarea = document.querySelector("h1 span").append(pref);
-    }
-    if (deposit >= 100000) {
-        let pref = document.createElement('span');
-        pref.style = `color: #f5f5f5;padding: 2px 8px;
-        margin: 0px 0px 0px 6px;
-        border-radius: 0px 6px 6px 0px;
-        margin-left: 25px;
-        display: inline-block;
-        background: #8152C6;
-        line-height: 16px;
-        font-size: 12px;`;
-        pref.innerHTML = "Депозит";
-        pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
-        let nickarea = document.querySelector("h1 span").append(pref);
-    }
+    // let deposit = parseInt(document.querySelector('h3.amount').innerHTML.replace('₽','').replace(' ',''));
+    // if (deposit >= 10000 && deposit < 50000) {
+    //     let pref = document.createElement('span');
+    //     pref.style = `color: #f5f5f5;padding: 2px 8px;
+    //     margin: 0px 0px 0px 6px;
+    //     border-radius: 0px 6px 6px 0px;
+    //     display: inline-block;
+    //     margin-left: 25px;
+    //     background: #47626f;
+    //     line-height: 16px;
+    //     font-size: 12px;
+    //     -webkit-background-clip: text;-webkit-text-fill-color: white;`;
+    //     pref.innerHTML = "Депозит";
+    //     pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
+    //     let nickarea = document.querySelector("h1 span").append(pref);
+    // }
+    // if (deposit >= 50000 && deposit < 100000) {
+    //     let pref = document.createElement('span');
+    //     pref.style = `color: #f5f5f5;padding: 2px 8px;
+    //     margin: 0px 0px 0px 6px;
+    //     border-radius: 0px 6px 6px 0px;
+    //     display: inline-block;
+    //     margin-left: 25px;
+    //     background: #8a315d;
+    //     line-height: 16px;
+    //     font-size: 12px;
+    //     -webkit-background-clip: text;-webkit-text-fill-color: white;`;
+    //     pref.innerHTML = "Депозит";
+    //     pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
+    //     let nickarea = document.querySelector("h1 span").append(pref);
+    // }
+    // if (deposit >= 100000) {
+    //     let pref = document.createElement('span');
+    //     pref.style = `color: #f5f5f5;padding: 2px 8px;
+    //     margin: 0px 0px 0px 6px;
+    //     border-radius: 0px 6px 6px 0px;
+    //     margin-left: 25px;
+    //     display: inline-block;
+    //     background: #8152C6;
+    //     line-height: 16px;
+    //     font-size: 12px;
+    //     -webkit-background-clip: text;-webkit-text-fill-color: white;`;
+    //     pref.innerHTML = "Депозит";
+    //     pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
+    //     let nickarea = document.querySelector("h1 span").append(pref);
+    // }
     // Плашка Premium
     // if (data) {
         // if (data.premium) {
@@ -267,6 +280,125 @@ async function profileRender() {
     if (await hidelike=='on') {
         document.querySelectorAll(".page_counter")[1].remove();
     }
+
+
+    // TrustFactor
+    let blzt_trust_val = 0;
+
+    let blzt_puser_likes = parseInt(document.querySelector(".page_counter .count").innerHTML.replace(' ', ''));
+    let blzt_puser_nick = document.querySelector("h1.username span"),
+        blzt_puser_nick_val = blzt_puser_nick.innerHTML.replace(/ <i.*?>.*?<\/i>/ig,''),
+        blzt_puser_role = blzt_puser_nick.classList,
+        blzt_puser_deposit = parseInt(document.querySelector('h3.amount').innerHTML.replace('₽','').replace(' ',''));
+        
+    if (blzt_puser_deposit > 10000) {
+        blzt_trust_val+=7;
+    }   
+    if (blzt_puser_deposit > 20000) {
+        blzt_trust_val+=5;
+    }   
+    if (blzt_puser_deposit > 50000) {
+        blzt_trust_val+=10;
+    }   
+    if (blzt_puser_deposit > 100000) {
+        blzt_trust_val+=20;
+    }   
+    if (blzt_puser_deposit > 200000) {
+        blzt_trust_val+=10;
+    }   
+    if (blzt_puser_deposit > 300000) {
+        blzt_trust_val+=7;
+    }   
+
+    if (blzt_puser_likes > 200) {
+        blzt_trust_val+=4;
+    }
+    if (blzt_puser_likes > 500) {
+        blzt_trust_val+=7;
+    }
+    if (blzt_puser_likes > 1000) {
+        blzt_trust_val+=15;
+    }
+    if (blzt_puser_likes > 3000) {
+        blzt_trust_val+=5;
+    }
+    if (blzt_puser_likes > 6000) {
+        blzt_trust_val+=5;
+    }
+    if (blzt_puser_likes > 10000) {
+        blzt_trust_val+=7;
+    }
+    if (blzt_puser_likes > 2000) {
+        blzt_trust_val+=15;
+    }
+
+    
+    if (blzt_puser_role.contains("style3")) {
+        blzt_trust_val+=85;
+    }
+    if (blzt_puser_role.contains("style4")) {
+        blzt_trust_val+=25;
+    }
+    if (blzt_puser_role.contains("style30")) {
+        blzt_trust_val+=35;
+    }
+    if (blzt_puser_role.contains("style365")) {
+        blzt_trust_val+=15;
+    }
+    if (blzt_puser_role.contains("style353")) {
+        blzt_trust_val+=40;
+    }
+    if (blzt_puser_role.contains("style12")) {
+        blzt_trust_val+=35;
+    }
+    if (blzt_puser_role.contains("style349")) {
+        blzt_trust_val+=15;
+    }
+    if (blzt_puser_role.contains("style350")) {
+        blzt_trust_val+=40;
+    }
+    if (blzt_puser_role.contains("style354")) {
+        blzt_trust_val+=35;
+    }
+    if (blzt_puser_role.contains("style7")) {
+        blzt_trust_val+=30;
+    }
+    if (blzt_puser_role.contains("banned")) {
+        blzt_trust_val=0;
+    }
+
+
+
+    if (blzt_trust_val > 100) {
+        blzt_trust_val=100;
+    }
+
+    if (data) {
+        if (data.trustfactor) {
+            blzt_trust_val = data.trustfactor;
+        }
+    }
+
+    let blzt_trust = document.querySelector(".insuranceDeposit");
+    let blzt_trust_render = `
+    <br>
+    <div class="section insuranceDeposit">
+        <div class="secondaryContent">
+            <h3>
+                <a href="${blzt_link_trust}" class="OverlayTrigger username" style="max-width: 200px; word-wrap: break-word;">
+                    Фактор доверия (β) ${blzt_puser_nick_val}
+                </a>
+            </h3>
+
+            <h3 style="margin-bottom: 0px; font-size: 18px !important;" class="amount ${blzt_trust_val > 35 ? 'mainc' : 'redc'}">
+                ${blzt_trust_val} / 100
+            </h3>
+        </div>
+    </div>`;
+    let blzt_trust_block = document.createElement("div");
+        blzt_trust_block.innerHTML = blzt_trust_render;
+
+    blzt_trust.append(blzt_trust_block);
 }
 
 function request(url) {
@@ -428,7 +560,7 @@ async function parseUsername(e) {
             //         break;
             // }
         }
-        if (e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)") && data.svgcss) {
+        if (e.parentElement.parentElement.parentElement.parentElement.parentElement.dataset.author == nickname && data.svgcss) {
             let svg = document.createElement('div');
             e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)").classList.add("custom")
             svg.classList.add("avatarUserBadges");
@@ -437,6 +569,15 @@ async function parseUsername(e) {
             </span>`;
             e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder").prepend(svg)
         }
+        // if (e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)") && data.svgcss) {
+        //     let svg = document.createElement('div');
+        //     e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)").classList.add("custom")
+        //     svg.classList.add("avatarUserBadges");
+        //     svg.innerHTML = `
+        //     <span style="${data.svgcss}" class="avatarUserBadge  Tooltip uniq_default" title="" tabindex="0" data-cachedtitle="${data.bannertxt}">
+        //     </span>`;
+        //     e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder").prepend(svg)
+        // }
         if (document.querySelector(".avatarScaler") && data.banner && !document.querySelector(".customBanner") && document.querySelectorAll("h1.username")[0].innerHTML.includes(e.innerHTML)) {
             let banner = document.createElement('em');
             banner.classList.add("userBanner");
