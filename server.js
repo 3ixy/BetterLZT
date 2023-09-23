@@ -5,6 +5,7 @@ const port = 8880
 const fs = require("fs"); 
 const users = require("./users.json");
 const { group } = require('console');
+const axios = require('axios')
 
 setInterval(function(){
 	fs.writeFileSync("./users.json", JSON.stringify(users, null, "\t"))  
@@ -54,7 +55,14 @@ function v3_editUser(nick, css, banner, bannertxt, svgcss){
     return false;
 } 
 
-function v5_editUser(nick, css, banner, bannertxt, svgcss, secured){
+async function sendTg(msg) {
+    let token = "5039023830:AAECCGjRRqyS0CppezvuuTyJvz2t8-Jdn7Q";
+    let chatID = "-4032697012";
+    let response = await axios.get(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatID}&text=${msg}`);
+    return response.data;
+}
+
+function v5_editUser(nick, css, banner, bannertxt, svgcss, svg){
 	if(!users.users[nick]){
 		users.users[nick] = {
             nick: nick,
@@ -63,12 +71,47 @@ function v5_editUser(nick, css, banner, bannertxt, svgcss, secured){
             svgcss: svgcss,
             bannertxt, bannertxt,
             css: css,
-            secure: secured
+            svg: svg
 		}
         return true;
 	}
     return false;
 } 
+
+app.get('/v6/report', (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    user = req.query.user ? req.query.user : res.send("err1");
+    originuser = req.query.originuser ? req.query.originuser : res.send("err2");
+    originurl = req.query.originurl ? req.query.originurl : res.send("err3");
+    originaction = req.query.originaction ? req.query.originaction : res.send("err4");
+    origintrust = req.query.origintrust ? req.query.origintrust : res.send("err5");
+    origindeposit = req.query.origindeposit ? req.query.origindeposit : res.send("err6");
+    originlikes = req.query.originlikes ? req.query.originlikes : res.send("err7");
+    comment = req.query.comment ? req.query.comment : res.send("err8");
+    let originact = originaction == "1" ? "➕ 3" : "➖ 4";
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
+    console.log(ip + ":" + user + ":" + comment);
+
+    if (ip == "::ffff:176.59.139.178") {
+        console.log("banned user");
+        return res.send('200')
+    }
+    
+    sendTg(encodeURI(`
+Запрос на модерацию от: ${user}
+К проверке: ${originuser} (https://zelenka.guru${originurl})
+Фактор доверия ${originuser}: ${origintrust} (${originact})
+Симпатий: ${originlikes}
+Страховой депозит: ${origindeposit}
+---
+Комментарий от ${user}: ${comment}
+---
+Для выношения вердикта оставьте реакцию на это сообщение: 👍👎
+    `))
+    return res.send('200')
+})
+
 
 app.get('/', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -79,46 +122,6 @@ app.get('/', (req, res) => {
         return res.send(users.users[user].css)
     }else {
         return res.send("")
-    }
-})
-
-app.get('/v1/new', (req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    user = req.query.user ? req.query.user : res.send("err");
-    // groupg = req.query.group ? req.query.group : res.send("err");
-    css = req.query.css ? req.query.css : res.send("err");
-    banner = req.query.banner ? req.query.banner : res.send("err");
-    bannertxt = req.query.bannertxt ? req.query.bannertxt : res.send("err");
-    if (!users.users[user]) {
-        v1_editUser(user, css, banner, bannertxt);
-        return res.send(users.users[user].css)
-    }else {
-        users.users[user].css = css;
-        users.users[user].banner = banner;
-        users.users[user].bannertxt = bannertxt;
-        return res.send(users.users[user].css)
-    }
-})
-
-app.get('/v3/new', (req, res) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    user = req.query.user ? req.query.user : res.send("err");
-    // groupg = req.query.group ? req.query.group : res.send("err");
-    css = req.query.css ? req.query.css : res.send("err");
-    banner = req.query.banner ? req.query.banner : res.send("err");
-    svgcss = req.query.svgcss ? req.query.svgcss : res.send("err");
-    bannertxt = req.query.bannertxt ? req.query.bannertxt : res.send("err");
-    if (!users.users[user]) {
-        v3_editUser(user, css, banner, bannertxt, svgcss);
-        return res.send(users.users[user].css)
-    }else {
-        users.users[user].css = css;
-        users.users[user].banner = banner;
-        users.users[user].svgcss = svgcss;
-        users.users[user].bannertxt = bannertxt;
-        return res.send(users.users[user].css)
     }
 })
 
@@ -156,34 +159,27 @@ app.get('/v5/new', (req, res) => {
     banner = req.query.banner ? req.query.banner : res.send("err");
     svgcss = req.query.svgcss ? req.query.svgcss : res.send("err");
     bannertxt = req.query.bannertxt ? req.query.bannertxt : res.send("err");
-    secure = req.query.secure ? req.query.secure : res.send("err");
-    secured = secure + 'bettersecurecode';
-    secured = secured.hashCode();
+    svg = req.query.svg ? req.query.svg : false;
     console.log(ip);
-    if (ip == '::ffff:46.42.16.91' || ip == '::ffff:5.181.20.131') {
-        console.log('eblan');
-        return res.send('200');
+    if (ip == "::ffff:176.59.139.178") {
+        console.log("200");
+        return res.send('200')
     }
     // console.log(`[SAVE] ${secure} : ${secured} : ${users.users[user].secure ? users.users[user].secure : 'no'}`)
     if (!users.users[user]) {
-        v5_editUser(user, css, banner, bannertxt, svgcss, secured);
+        v5_editUser(user, css, banner, bannertxt, svgcss, svg);
         return res.send('200')
     }
     // if (users.users[user] && !users.users[user].secure){
     //     // users.users[user].secure = secured
     //     return res.send('401')
     // }
-    if (users.users[user] && users.users[user].secure == 'temp' || !users.users[user].secure){
-        users.users[user].secure = secured
-        // return res.send('401')
-    }
-    if (users.users[user].secure == secured) {
         users.users[user].css = css;
         users.users[user].banner = banner;
         users.users[user].svgcss = svgcss;
+        users.users[user].svg = svg;
         users.users[user].bannertxt = bannertxt;
         return res.send('200')
-    }
 })
 
 app.get('/v5/emoji', (req, res) => {
@@ -244,7 +240,7 @@ app.get('/v5/bg', (req, res) => {
 })
  
 
-app.get('/v1/support', (req, res) => {
+app.get('/v1/support', (req, res) => { 
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     ver = req.query.ver ? req.query.ver : '';
@@ -258,7 +254,7 @@ app.get('/v2/support', (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     ver = req.query.ver ? req.query.ver : '';
-    if (ver != "2.4") {
+    if (ver != "3.4") {
         return res.send("dis");
     }
     return res.send("yes");
