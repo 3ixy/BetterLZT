@@ -23,7 +23,7 @@ const
     blzt_link_tos   = "https://zelenka.guru/threads/5816508/",
     blzt_link_trust = "https://zelenka.guru/threads/5821466/",
     server          = "http://lzt.hasanbek.ru:8880",
-    adlist_w        = ["zelenka.guru/threads/3649746", "http://proxysoxy.com", "zelenka.guru/threads/5720998", "https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/4871985/", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
+    adlist_w        = ["zelenka.guru/threads/3649746", "http://proxysoxy.com", "zelenka.guru/threads/5883557", "zelenka.guru/threads/5720998", "https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/4871985/", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
     adlist_l        = ["threads", "members", "lolz.live", "zelenka.guru", "t.me"],
     adlist_white    = ["https://zelenka.guru/threads/5456926/", "zelenka.guru/threads/5545248/"];
 
@@ -189,7 +189,6 @@ async function daemon() {
             let value = arr[1].split(']')[0];
             let fastinfo = await JSON.parse(await request(`${server}/v6/fast?id=${value}`));
 
-       
                 let text = `
                 <h3>${fastinfo.title} | ${fastinfo.ammount} RUB</h3>
                 ${fastinfo.totalusers} / ${fastinfo.maxusers} <progress value="${fastinfo.totalusers}" max="${fastinfo.maxusers}">${fastinfo.totalusers} / ${fastinfo.maxusers}</progress>
@@ -197,11 +196,8 @@ async function daemon() {
                 <br>
                 ${fastinfo.users[nickname] ? 'Вы уже приняли участие в данном розыгрыше' : `<a onclick="doFast(${fastinfo.id})">Принять участие</a>`}
                 `
-                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterfast=.*?\].*?\[\/betterfast\]/g, text);
-           
+                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterfast=.*?\].*?\[\/betterfast\]/g, text);  
         }
-
-      
     }
     return;
 }
@@ -298,73 +294,6 @@ async function profileRender() {
             document.head.appendChild(styleSheet);
         }
     }
-
-    // плашка с депозитом
-
-    // let deposit = parseInt(document.querySelector('h3.amount').innerHTML.replace('₽','').replace(' ',''));
-    // if (deposit >= 10000 && deposit < 50000) {
-    //     let pref = document.createElement('span');
-    //     pref.style = `color: #f5f5f5;padding: 2px 8px;
-    //     margin: 0px 0px 0px 6px;
-    //     border-radius: 0px 6px 6px 0px;
-    //     display: inline-block;
-    //     margin-left: 25px;
-    //     background: #47626f;
-    //     line-height: 16px;
-    //     font-size: 12px;
-    //     -webkit-background-clip: text;-webkit-text-fill-color: white;`;
-    //     pref.innerHTML = "Депозит";
-    //     pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
-    //     let nickarea = document.querySelector("h1 span").append(pref);
-    // }
-    // if (deposit >= 50000 && deposit < 100000) {
-    //     let pref = document.createElement('span');
-    //     pref.style = `color: #f5f5f5;padding: 2px 8px;
-    //     margin: 0px 0px 0px 6px;
-    //     border-radius: 0px 6px 6px 0px;
-    //     display: inline-block;
-    //     margin-left: 25px;
-    //     background: #8a315d;
-    //     line-height: 16px;
-    //     font-size: 12px;
-    //     -webkit-background-clip: text;-webkit-text-fill-color: white;`;
-    //     pref.innerHTML = "Депозит";
-    //     pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
-    //     let nickarea = document.querySelector("h1 span").append(pref);
-    // }
-    // if (deposit >= 100000) {
-    //     let pref = document.createElement('span');
-    //     pref.style = `color: #f5f5f5;padding: 2px 8px;
-    //     margin: 0px 0px 0px 6px;
-    //     border-radius: 0px 6px 6px 0px;
-    //     margin-left: 25px;
-    //     display: inline-block;
-    //     background: #8152C6;
-    //     line-height: 16px;
-    //     font-size: 12px;
-    //     -webkit-background-clip: text;-webkit-text-fill-color: white;`;
-    //     pref.innerHTML = "Депозит";
-    //     pref.title = "Страховой депозит: "+document.querySelector('h3.amount').innerHTML;
-    //     let nickarea = document.querySelector("h1 span").append(pref);
-    // }
-    // Плашка Premium
-    // if (data) {
-        // if (data.premium) {
-        //     let pref = document.createElement('span');
-        //     pref.style = `color: #f5f5f5;padding: 2px 8px;
-        //     margin: 0px 0px 0px 6px;
-        //     border-radius: 6px 0px 0px 6px;
-        //     display: inline-block;
-        //     background: #ff0076;
-        //     margin-left: 25px;
-        //     line-height: 16px;
-        //     font-size: 12px;`;
-        //     pref.innerHTML = "Premium";
-        //     pref.title = "BetterLZT Premium";
-        //     let nickarea = document.querySelector("h1 span").append(pref);
-        // }
-    // }
-
 
     // Скрытие лайков
 
@@ -496,7 +425,7 @@ async function profileRender() {
         <div class="secondaryContent">
             <h3>
                 <a href="${blzt_link_trust}" class="OverlayTrigger username" style="max-width: 200px; word-wrap: break-word;">
-                    Фактор доверия (β) ${blzt_puser_nick_val}
+                    Фактор доверия ${blzt_puser_nick_val}
                 </a>
             </h3>
 
@@ -515,7 +444,8 @@ async function profileRender() {
 
 function voteTrust(trust) {
     let html = `
-    <i>Введите комментарий, после чего нажмите на кнопку для голосования. КОММЕНТАРИЙ ОБЯЗАТЕЛЕН! <br>О решении вы будете в ЛС форума<br>За спам  вы будете лишены доступа к голосованию и получите пониженый фактор доверия.</i>
+    <i>В случае принятия заявки, вы будете уведомлены в ЛС Форума.
+    За спам вы будете лишены доступа к голосованию и получите пониженый фактор доверия.</i>
     <input id="commentt" style=" padding: 6px;border-radius: 6px;height: 20px;background: #303030;color: white;border: 1px solid rgb(54, 54, 54); placeholder="Почему вы считаете свое решение правильным?">
     <div style="margin-top: 15px;  display: flex; gap: 5px;">
     <a class="button leftButton primary" onclick="commitVote('1', ${trust})">👍</a>
@@ -546,7 +476,7 @@ async function commitVote(type, trust) {
         return XenForo.alert("Доступ к функционалу ограничен. Свяжитесь с разработчиком", 1, 10000)
     }
     else {
-        return XenForo.alert("Ошибка", 1, 10000)
+        return XenForo.alert("Ошибка синхронизации с сервером", 1, 10000)
     }
 }
 
@@ -586,7 +516,7 @@ async function uniqSave() {
         XenForo.alert("Ошибка синхронизации с сервером, свяжитесь с разработчиком t.me/hasantigiev or zelenka.guru/lays", 1, 10000)
     }
     if (await req == '401') {
-        XenForo.alert("Для вашего профиля не найдены ключи авторизации. Cвяжитесь с разработчиком t.me/hasantigiev or zelenka.guru/lays", 1, 10000)
+        XenForo.alert("Для вашего профиля не найдены ключи авторизации. Cвяжитесь с разработчиком t.me/hasantigiev или zelenka.guru/lays", 1, 10000)
     }
     if (await req == '200') {
         XenForo.alert("Успех", 1, 10000);
@@ -632,6 +562,8 @@ async function cacheSync() {
         }
     } catch (error) {
         console.error("[BetterLZT] Sync error: "+error)
+        jsontext = `{"users": {},"fasts": {}}`
+        setCache(jsontext);
     }
    
 }
@@ -752,15 +684,6 @@ async function parseUsername(e) {
             </span>`;
             e.parentElement.parentElement.parentElement.parentElement.querySelector(".avatarHolder").prepend(svg)
         }
-        // if (e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)") && data.svgcss) {
-        //     let svg = document.createElement('div');
-        //     e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)").classList.add("custom")
-        //     svg.classList.add("avatarUserBadges");
-        //     svg.innerHTML = `
-        //     <span style="${data.svgcss}" class="avatarUserBadge  Tooltip uniq_default" title="" tabindex="0" data-cachedtitle="${data.bannertxt}">
-        //     </span>`;
-        //     e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelector(".avatarHolder").prepend(svg)
-        // }
         if (document.querySelector(".avatarScaler") && data.banner && !document.querySelector(".customBanner") && document.querySelectorAll("h1.username")[0].innerHTML.includes(e.innerHTML)) {
             let banner = document.createElement('em');
             banner.classList.add("userBanner");
