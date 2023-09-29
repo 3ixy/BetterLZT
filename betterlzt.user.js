@@ -1304,7 +1304,7 @@ async function dialogWindow() {
     <iframe src="https://tv.hasanbet.site/better/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -25px;" height="70px"></iframe>
 
     ${htmlall}
-    version ${version}<br><iframe src="https://tv.hasanbet.site/better/premium.php?user=openresty" frameborder="0" width="200px" style="" height="30px"></iframe>
+    version ${version}<br><iframe src="https://tv.hasanbet.site/better/premium.php?user=${nickname}" frameborder="0" width="200px" style="" height="30px"></iframe>
     <style>
     details {
         width: 100%;
