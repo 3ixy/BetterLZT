@@ -1,93 +1,102 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.0/css/all.min.css" integrity="sha512-3PN6gfRNZEX4YFyz+sIyTF6pGlQiryJu9NlGhu9LrLMQ7eDjNgudQoFDK3WSNAayeIKc6B8WXXpo4a7HqxjKwg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <iframe src="https://tv.hasanbet.site/better/sfui/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -18px;" height="80px"></iframe>
 <br>
+<p>BetterLZT Beta (v4.9.0)</p>
+<br>
 <button id="settings1" style="box-shadow: inset 0px -2px 0px 0px rgb(0, 186, 120);">Основные</button>
 <button id="settings2">Маркет</button>
 <button id="settings3">Кастомизация</button>
-
-
+<button id="settings4">Премиум</button>
 <div id="settings1-content" class="settings-content">
-  <h2>Основные</h2>
-
-  <label>
-    <input type="checkbox">
-    <span>Скрыть бесплатные уники</span>
-  </label>
-  <br>
-  <label>
-    <input type="checkbox">
-    <span>AdBlock</span>
-  </label>
-  <br>
-  <label>
-    <input type="checkbox">
-    <span>Скрытие счетчика лайков в профилях</span>
-  </label>
-  <br>
-  <label>
-    <input type="checkbox">
-    <span>Скрытие контента в розыгрышах</span>
-  </label>
-  <hr>
-  <label>
-    <span>Секретная фраза</span><br>
-    <input id="secretph" placeholder="Секретная фраза" style="margin-top: 4px;">
-    <a onclick="SecretSet()" class="button leftButton primary">Сохранить</a>
-  </label>
-</div>
-
-
-<div id="settings2-content" class="settings-content" style="display: none;">
-  <h2>Маркет</h2>
-  <label>
-    <input type="checkbox">
-    <span>Скрытие плашки "Вы игнорируете продавца ..."</span>
-  </label>
-  <br>
-  <label>
-    <input type="checkbox">
-    <span>Скрытие аватарок</span>
-  </label>
-</div>
-
-<div id="settings3-content" class="settings-content" style="display: none;">
-    <h2>Кастомизация</h2>
-  
-    <label for="">
-
-      <a class="customicon available" onclick="EmojiSet('')">
-        <i class="fas fa-wrench"></i>
-        <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
-     </a>
-      <a class="customicon available" onclick="EmojiSet('')">
-        <i class="fas fa-wrench"></i>
-        <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
-      </a>
-      <a class="customicon available" onclick="EmojiSet('')">
-        <i class="fas fa-wrench"></i>
-        <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
-      </a>
-      <a class="customicon available" onclick="EmojiSet('')">
-        <i class="fas fa-wrench"></i>
-        <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
-      </a>
-      
-</label>
-<br><br>
-<span><i class="fas fa-lock"></i> - для использования эмодзи необходим Premium</span><br><br>
-    <label for="prem">
-        <a class="customicon onlyprem"><i class="fas fa-wrench"></i><i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock"></i></a>
+    <h2>Основные</h2>
+    <label>
+        <input type="checkbox">
+        <span>Скрыть бесплатные уники</span>
     </label>
+    <br>
+    <label>
+        <input type="checkbox">
+        <span>AdBlock</span>
+    </label>
+    <br>
+    <label>
+        <input type="checkbox">
+        <span>Скрытие счетчика лайков в профилях</span>
+    </label>
+    <br>
+    <label>
+        <input type="checkbox">
+        <span>Скрытие контента в розыгрышах</span>
+    </label>
+    <hr>
+    <label>
+        <span>Секретная фраза</span>
+        <br>
+        <input id="secretph" placeholder="Секретная фраза" style="margin-top: 4px;">
+        <a onclick="SecretSet()" class="button leftButton primary">Сохранить</a>
+    </label>
+</div>
+<div id="settings2-content" class="settings-content" style="display: none;">
+    <h2>Маркет</h2>
+    <label>
+        <input type="checkbox">
+        <span>Скрытие плашки "Вы игнорируете продавца ..."</span>
+    </label>
+    <br>
+    <label>
+        <input type="checkbox">
+        <span>Скрытие аватарок</span>
+    </label>
+</div>
+<div id="settings3-content" class="settings-content" style="display: none;">
+    <h2>Иконки у ника</h2>
+    <label for="">
+        <a class="customicon available" onclick="EmojiSet('')">
+            <i class="fas fa-wrench"></i>
+            <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
+        </a>
+        <a class="customicon available" onclick="EmojiSet('')">
+            <i class="fas fa-wrench"></i>
+            <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
+        </a>
+        <a class="customicon available" onclick="EmojiSet('')">
+            <i class="fas fa-wrench"></i>
+            <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
+        </a>
+        <a class="customicon available" onclick="EmojiSet('')">
+            <i class="fas fa-wrench"></i>
+            <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
+        </a>
+    </label>
+    <br>
+    <br>
+    <span>
+        <i class="fas fa-lock"></i> - для использования эмодзи необходим Premium </span>
+    <br>
+    <br>
+    <label for="prem">
+        <a class="customicon onlyprem">
+            <i class="fas fa-wrench"></i>
+            <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock"></i>
+        </a>
+    </label>
+    <br>
+    <h2>Редактор уника</h2> ${uniqarea}
+</div>
+<div id="settings4-content" class="settings-content" style="display: none;">
+    <h2>Управление подпиской</h2>
+    <iframe src="https://tv.hasanbet.site/better/sfui/premium.php?user=openresty" frameborder="0" height="60px"></iframe><br>
+    <a href="https://hasantigiev.t.me/">Приобрести подписку</a>
 </div>
 
 <style>
-body {
-  padding: 0;
-  margin: 0;
-  font-family: sans-serif;
-  background-color: #303030;
-  color: white;
-}
+  body {
+    padding: 0;
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #303030;
+    color: white;
+  }
 input {
     padding: 13px;
     border-radius: 6px;
@@ -95,6 +104,10 @@ input {
     background: #303030;
     color: white;
     border: 1px solid rgb(0, 186, 120);
+}
+a {
+  color: rgb(0, 186, 120);
+  text-decoration: none;
 }
 .settings-content {
   padding: 20px;
@@ -131,7 +144,7 @@ var elements = document.querySelectorAll('button');
 
 for (var i = 0; i < elements.length; i++) {
     elements[i].addEventListener('click', function(e) {
-        for (let index = 1; index < 4; index++) {
+        for (let index = 1; index < 5; index++) {
             document.getElementById('settings' + index + '-content').style.display = 'none';
             document.getElementById('settings' + index).style.boxShadow = 'none';
         }

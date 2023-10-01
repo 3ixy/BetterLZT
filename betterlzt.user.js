@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         BetterLZT
+// @name         BetterLZT BETA
 // @namespace    hasanbet
-// @version      v40
+// @version      v49.0
 // @description  Сделай свой жизнь на LolzTeam проще!
 // @author       https://zelenka.guru/lays (openresty)
 // @match        https://zelenka.guru/*
@@ -17,13 +17,12 @@
 // @license MIT
 // ==/UserScript==
 
-
 const
-    version         = "4.0",
+    version         = "5.0.0 Beta (4.9.0)",
     blzt_link_tos   = "https://zelenka.guru/threads/5816508/",
     blzt_link_trust = "https://zelenka.guru/threads/5821466/",
     server          = "http://lzt.hasanbek.ru:8880",
-    adlist_w        = ["zelenka.guru/threads/3649746", "http://proxysoxy.com", "zelenka.guru/threads/5883557", "zelenka.guru/threads/5720998", "https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/4871985/", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
+    adlist_w        = ["zelenka.guru/threads/3649746", "http://proxysoxy.com", "zelenka.guru/angeldrainer/", "zelenka.guru/threads/5883557", "zelenka.guru/threads/5720998", "https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/4871985/", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
     adlist_l        = ["threads", "members", "lolz.live", "zelenka.guru", "t.me"],
     adlist_white    = ["https://zelenka.guru/threads/5456926/", "zelenka.guru/threads/5545248/"];
 
@@ -45,7 +44,8 @@ let usercss,
     avablock,
     contestblock,
     uniqstatus,
-    shortcut;
+    shortcut,
+    reportbtn;
 
 (async function() {
     usercss     = await GM.getValue("usercss") ? GM.getValue("usercss") : 'null';
@@ -64,15 +64,12 @@ let usercss,
     uniqstatus  = await GM.getValue("uniqstatus") ? GM.getValue("uniqstatus") : 'null';
     contestblock= await GM.getValue("contestblock") ? GM.getValue("contestblock") : 'null';
     shortcut   = await GM.getValue("shortcut") ? GM.getValue("shortcut") : 'null';
+    reportbtn   = await GM.getValue("reportbtn") ? GM.getValue("reportbtn") : 'null';
     window.addEventListener("DOMContentLoaded",async (event) => {
         if (await GM.getValue("firstrun") != "ok") {
-            XenForo.alert(`Благодарим за установку расширения!\nПеред началом использования прочтите соглашение: ${blzt_link_tos}`, "[BetterLZT] Добро пожаловать!");
+            XenForo.alert(`Благодарим за установку расширения!\nПеред началом использования прочтите соглашение: ${blzt_link_tos}`, "Добро пожаловать!");
             await GM.setValue("firstrun", "ok");
         }
-        // if (await GM.getValue("firsttrust2") != "ok") {
-        //     XenForo.alert(`<h1>Переработка алгоритма "Фактора Доверия".</h1><h3>Что это?</h3>- Специальный алгоритм определяет уровень доверия к пользователю по шкале, от 0 до 100. Нормальное значение среднего пользователя = 35 и выше. Функция на стадии бета-тестирования, все предложения и недочеты просим присылать в тему указанную ниже<h3>Переработка алгоритма</h3>- Уровень доверия каждого пользователя, который имел средний рейтинг ≥ 5 был повышен. Однако, рейтинг некоторых пользователей остался неизменным, в таком случае можно обратиться к разработчику и уточнить, объективная ли это оценка, или же алогритм выставил неверную оценку. <br><b>Хотите сравнить рейтинг До и После?</b> На страничке нашего расширение в 'GreasyFork' можно откатиться до предыдущей версии (v30), сверить новый и старый рейтинг, а затем установить вновь новую версию<br><b>Спасибо за запуск BetterLZT, именно Вы помогаете нам становиться нам лучше с каждым днем.</b> <h3>Подробнее в статье: ${blzt_link_trust}</h3>`, "Фактор доверия 'BetterLZT'.");
-        //     await GM.setValue("firsttrust2", "ok")
-        // }
         profileRender();
         themeRender();
         renderFunctions();
@@ -418,6 +415,33 @@ async function profileRender() {
         }
     }
 
+    let blzt_trust_text,
+        blzt_trust_color;
+    if (blzt_trust_val > 15 && blzt_trust_val < 35)
+    {
+        blzt_trust_text = 'Плохой';
+        blzt_trust_color = 'redc';
+    }
+    else if (blzt_trust_val > 35 && blzt_trust_val < 65)
+    {
+        blzt_trust_text = 'Нормальный';
+        blzt_trust_color = 'mainc';
+    }
+    else if (blzt_trust_val > 65 && blzt_trust_val < 84)
+    {
+        blzt_trust_text = 'Отличный';
+        blzt_trust_color = 'mainc';
+    }
+    else if (blzt_trust_val > 84)
+    {
+        blzt_trust_text = 'Наивысшый';
+        blzt_trust_color = 'mainc';
+    }
+    else {
+        blzt_trust_text = 'Ужасный';
+        blzt_trust_color = 'redc';
+    }
+
     let blzt_trust = document.querySelector(".insuranceDeposit");
     let blzt_trust_render = `
     <br>
@@ -425,12 +449,12 @@ async function profileRender() {
         <div class="secondaryContent">
             <h3>
                 <a href="${blzt_link_trust}" class="OverlayTrigger username" style="max-width: 200px; word-wrap: break-word;">
-                    Фактор доверия ${blzt_puser_nick_val}
+                    Уровень доверия к ${blzt_puser_nick_val}
                 </a>
             </h3>
 
-            <h3 style="margin-bottom: 0px; font-size: 18px !important;" class="amount ${blzt_trust_val > 35 ? 'mainc' : 'redc'}">
-            ≈ ${blzt_trust_val} / 100
+            <h3 style="margin-bottom: 0px; font-size: 18px !important;" class="amount ${blzt_trust_color}">
+            ${blzt_trust_text}
             </h3>
             <br>
             <a class="button leftButton primary" onclick="voteTrust(${blzt_trust_val})">Изменить рейтинг👍👎</a>
@@ -555,7 +579,7 @@ async function cacheSync() {
     try {
         nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
         let response = await request(`${server}/v2/sync?user=${nickname}`).catch(err => {});
-        if (response != cache && response != '') {
+        if (response != cache && response != '' && JSON.parse(response)) {
             cache = response;
             await setCache(response);
             console.log('OK')
@@ -578,8 +602,8 @@ async function setSecure(e) {
 
 
 async function parseUsername(e) {
-    let data = await JSON.parse(await cache);
     try {
+        let data = await JSON.parse(await cache);
         if (!data.users[e.innerHTML]) { e.classList.add("custom"); return; }
         data = data.users[e.innerHTML];
 
@@ -1137,6 +1161,169 @@ async function dialogWindow() {
     }
 
     let htmlall = `
+    <iframe src="https://tv.hasanbet.site/better/sfui/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -19px;" height="80px"></iframe>
+    <br>
+    <p>BetterLZT Beta (v4.9.0)</p><br>
+    <button id="settings1" style="box-shadow: inset 0px -2px 0px 0px rgb(0, 186, 120);">Основные</button>
+    <button id="settings2">Маркет</button>
+    <button id="settings3">Кастомизация</button>
+    
+    
+    <div id="settings1-content" class="settings-content">
+      <h2>Основные</h2>
+      <label>
+        <input type="checkbox" onclick="setUniq('${uniqstatust ? 'off' : 'on'}');" ${uniqstatust ? 'checked' : ''}>
+        <span>Скрыть бесплатные уники</span>
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" onclick="setAdblock('${adblockt ? 'off' : 'on'}');" ${adblockt ? 'checked' : ''} />
+        <span>AdBlock</span>
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" onclick="setLike('${hideliket ? 'off' : 'on'}');" ${hideliket ? 'checked' : ''} />
+        <span>Скрытие счетчика лайков в профилях</span>
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" onclick="setContest('${contestblockt ? 'off' : 'on'}');" ${contestblockt ? 'checked' : ''} />
+        <span>Скрытие контента в розыгрышах</span>
+      </label>
+      <hr>
+      <label>
+        <span>Секретная фраза</span><br>
+        <input id="secretph" placeholder="Секретная фраза" style="margin-top: 4px;">
+        <a onclick="SecretSet()">Сохранить</a>
+      </label>
+    </div>
+    
+    
+    <div id="settings2-content" class="settings-content" style="display: none;">
+      <h2>Маркет</h2>
+      <label>
+        <input type="checkbox">
+        <span>Скрытие плашки "Вы игнорируете продавца ..."</span>
+      </label>
+      <br>
+      <label>
+        <input type="checkbox">
+        <span>Скрытие аватарок</span>
+      </label>
+    </div>
+    
+    <div id="settings3-content" class="settings-content" style="display: none;">
+        <h2>Иконки у ника</h2>
+      
+        <label for="">
+    
+          <a class="customicon available" onclick="EmojiSet('')">
+              <i class="fas fa-wrench"></i>
+              <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
+          </a>
+            <a class="customicon available" onclick="EmojiSet('')">
+              <i class="fas fa-wrench"></i>
+              <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
+            </a>
+            <a class="customicon available" onclick="EmojiSet('')">
+              <i class="fas fa-wrench"></i>
+              <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
+            </a>
+            <a class="customicon available" onclick="EmojiSet('')">
+              <i class="fas fa-wrench"></i>
+              <i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock-open"></i>
+            </a>
+            
+      </label>
+    <br><br>
+    <span><i class="fas fa-lock"></i> - для использования эмодзи необходим Premium</span><br><br>
+        <label for="prem">
+            <a class="customicon onlyprem"><i class="fas fa-wrench"></i><i style="z-index: 999999; font-size: 7px; margin-left: 3px;" class="fas fa-lock"></i></a>
+        </label>
+      <br>
+      <h2>Редактор уника</h2>
+      $uniqarea
+    </div>
+    
+
+    <style>
+    .errorOverlay>.baseHtml {
+        padding: 0px;
+    }
+    .xenOverlay .errorOverlay .errorDetails {
+        padding: 0px;
+        white-space: normal;
+    }
+    .errorDetails {
+      white-space: normal;
+      padding: 0;
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #303030;
+      color: white;
+    }
+    input {
+        padding: 4px;
+        border-radius: 6px;
+        height: 20px;
+        background: #303030;
+        color: white;
+        border: 1px solid rgb(0, 186, 120);
+    }
+    .settings-content {
+      padding: 20px;
+      /* border: 1px solid #ccc; */
+      margin-top: 10px;
+      transition: 0.5s;
+    }
+    button {
+      color: #fff;
+      border: 0;
+      background: 0;
+      padding: 0 0 5px;
+      margin-left: 7px;
+      font-size: 15px;
+      transition: 0.5s;
+    }
+    .customicon {
+      background-color:#424141;
+      padding: 10px;
+      transition: .1s;
+    }
+    .customicon:hover {
+      background-color:#242424;
+    }
+    .available {
+      border-top: 1px solid rgb(0, 186, 120);
+    }
+    .onlyprem {
+      border-top: 1px solid rgb(177, 0, 9);
+    }
+    </style>
+    <script>
+    var elements = document.querySelectorAll('button');
+    
+    for (var i = 0; i < elements.length; i++) {
+        elements[i].addEventListener('click', function(e) {
+            for (let index = 1; index < 4; index++) {
+                document.getElementById('settings' + index + '-content').style.display = 'none';
+                document.getElementById('settings' + index).style.boxShadow = 'none';
+            }
+            
+            e.target.style = "box-shadow: inset 0px -2px 0px 0px rgb(0, 186, 120);";
+            document.getElementById(e.target.id + '-content').style.display = 'block';
+        });
+    }
+    </script>
+
+    `
+
+/*
+    <a class="button leftButton primary" href="account/uniq/test">Настроить уник</a>
+
+    <a class="button leftButton primary" href="https://greasyfork.org/ru/scripts/470626-betterlzt">Обновить</a>
+
+    <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Приобрести Premium</a>
     <details style="">
         <summary>Основные<br><i>Реклама, секретный вопрос</i></summary>
         <div style="margin-top: -25px">
@@ -1215,78 +1402,9 @@ async function dialogWindow() {
             <iframe src="https://tv.hasanbet.site/better/prem.php?user=${nickname}" frameborder="0" width="100%"></iframe>
         </div>
     </details>
-
-    <a class="button leftButton primary" href="account/uniq/test">Настроить уник</a>
-
-    <a class="button leftButton primary" href="https://greasyfork.org/ru/scripts/470626-betterlzt">Обновить</a>
-
-    <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Приобрести Premium</a>
-    `
-
+*/
     let html_prem = `
-    <iframe src="https://tv.hasanbet.site/better/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -25px;" height="70px"></iframe>
-
     ${htmlall}
-    version ${version}<br><iframe src="https://tv.hasanbet.site/better/premium.php?user=${nickname}" frameborder="0" width="200px" style="" height="30px"></iframe>
-    <style>
-    details {
-        width: 100%;
-        background: #282828;
-        box-shadow: 0 0.1rem 1rem -0.5rem rgba(0, 0, 0, .4);
-        border-radius: 5px;
-        overflow: hidden;
-        margin-top: -15px;
-   }
-    summary i{
-        font-size: 10px;
-    }
-    summary {
-        padding: 1rem;
-        display: block;
-        background: #333;
-        padding-left: 2.2rem;
-        position: relative;
-        cursor: pointer;
-   }
-    summary:before {
-        content: '';
-        padding: 3px;
-        border-width: 0.4rem;
-        border-style: solid;
-        border-color: transparent transparent transparent #fff;
-        position: absolute;
-        top: 1.3rem;
-        left: 1rem;
-        transform: rotate(0);
-        transform-origin: 0.2rem 50%;
-        transition: 0.25s transform ease;
-   }
-    details[open] > div{
-        padding: 5px;
-    }
-    details[open] > summary:before {
-        transform: rotate(90deg);
-   }
-    details summary::-webkit-details-marker {
-        display: none;
-   }
-    details > ul {
-        padding-bottom: 1rem;
-        margin-bottom: 0;
-   }
-    
-    details button {
-        width: 35px; height: 35px; color: rgb(34,142,93); background: #303030; border: solid 1px white; font-size: 25px; margin-bottom: 5px; margin-left: 5px;
-    }
-    details input {
-        padding: 6px;
-        border-radius: 6px;
-        height: 20px;
-        background: #303030;
-        color: white;
-        border: 1px solid rgb(54, 54, 54);
-    }
-    </style>
     `;
     return  XenForo.alert(
         `${html_prem}`, 'BetterLZT v.'+version
