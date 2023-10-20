@@ -1,40 +1,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.0/css/all.min.css" integrity="sha512-3PN6gfRNZEX4YFyz+sIyTF6pGlQiryJu9NlGhu9LrLMQ7eDjNgudQoFDK3WSNAayeIKc6B8WXXpo4a7HqxjKwg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <iframe src="https://tv.hasanbet.site/better/sfui/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -18px;" height="80px"></iframe>
 <br>
-<p>BetterLZT Beta (v4.9.0)</p>
+<p>BetterLZT Beta (v5 beta-2)</p>
 <br>
 <button id="settings1" style="box-shadow: inset 0px -2px 0px 0px rgb(0, 186, 120);">Основные</button>
 <button id="settings2">Маркет</button>
 <button id="settings3">Кастомизация</button>
 <button id="settings4">Премиум</button>
 <div id="settings1-content" class="settings-content">
-    <h2>Основные</h2>
-    <label>
-        <input type="checkbox">
-        <span>Скрыть бесплатные уники</span>
-    </label>
-    <br>
-    <label>
-        <input type="checkbox">
-        <span>AdBlock</span>
-    </label>
-    <br>
-    <label>
-        <input type="checkbox">
-        <span>Скрытие счетчика лайков в профилях</span>
-    </label>
-    <br>
-    <label>
-        <input type="checkbox">
-        <span>Скрытие контента в розыгрышах</span>
-    </label>
-    <hr>
-    <label>
-        <span>Секретная фраза</span>
-        <br>
-        <input id="secretph" placeholder="Секретная фраза" style="margin-top: 4px;">
-        <a onclick="SecretSet()" class="button leftButton primary">Сохранить</a>
-    </label>
+    <h2>Новости</h2>
+    <iframe src="news.html" width="100%" height="50%" frameborder="0"></iframe>
 </div>
 <div id="settings2-content" class="settings-content" style="display: none;">
     <h2>Маркет</h2>
@@ -104,6 +79,10 @@ input {
     background: #303030;
     color: white;
     border: 1px solid rgb(0, 186, 120);
+}
+.card {
+    border-top: dashed 1px rgb(0, 186, 120);
+    padding: 2px;
 }
 a {
   color: rgb(0, 186, 120);
