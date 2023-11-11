@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BetterLZT
 // @namespace    hasanbet
-// @version      v41
+// @version      v42
 // @description  Сделай свой жизнь на LolzTeam проще!
 // @author       https://zelenka.guru/lays (openresty)
 // @match        https://zelenka.guru/*
@@ -11,7 +11,6 @@
 // @grant        GM.getValue
 // @grant        unsafeWindow
 // @connect      lzt.hasanbek.ru
-// @connect      tv.hasanbet.site
 // @connect      localhost
 // @run-at       document-body
 // @license MIT
@@ -19,7 +18,7 @@
 
 
 const
-    version         = "4.1",
+    version         = "4.2",
     blzt_link_tos   = "https://zelenka.guru/threads/5816508/",
     blzt_link_trust = "https://zelenka.guru/threads/5821466/",
     server          = "http://lzt.hasanbek.ru:8880",
@@ -200,16 +199,17 @@ async function daemon() {
             let value = arr[1].split(']')[0];
             let fastinfo = await JSON.parse(await request(`${server}/v6/fast?id=${value}`));
 
-       
-                let text = `
-                <h3>${fastinfo.title} | ${fastinfo.ammount} RUB</h3>
-                ${fastinfo.totalusers} / ${fastinfo.maxusers} <progress value="${fastinfo.totalusers}" max="${fastinfo.maxusers}">${fastinfo.totalusers} / ${fastinfo.maxusers}</progress>
-                ${fastinfo.needprem ? '<i>Для участия требуется подписка BetterLZT+</i>' : ''}
-                <br>
-                ${fastinfo.users[nickname] ? 'Вы уже приняли участие в данном розыгрыше' : `<a onclick="doFast(${fastinfo.id})">Принять участие</a>`}
-                `
-                document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterfast=.*?\].*?\[\/betterfast\]/g, text);
-           
+            let text = `
+            <h3>${fastinfo.title} | ${fastinfo.ammount} RUB</h3>
+            ${fastinfo.totalusers} / ${fastinfo.maxusers} <progress value="${fastinfo.totalusers}" max="${fastinfo.maxusers}">${fastinfo.totalusers} / ${fastinfo.maxusers}</progress>
+            ${fastinfo.needprem ? '<i>Для участия требуется подписка BetterLZT Premium</i>' : ''}
+            <br>
+            ${fastinfo.users[nickname] ? 'Вы уже приняли участие в данном розыгрыше' : `<a onclick="doFast(${fastinfo.id})">Принять участие</a>`}
+            ${fastinfo.totalusers == fastinfo.maxusers ? 'Увы, вы не успели принять участие' : ''} <br>
+            ${fastinfo.winner ? `Победил - ${fastinfo.winner}` : ''}
+            `
+            document.querySelector("blockquote").innerHTML = document.querySelector("blockquote").innerHTML.replace(/\[betterfast=.*?\].*?\[\/betterfast\]/g, text);
+        
         }
 
       
@@ -231,6 +231,9 @@ async function doFast(id) {
     }
     else if (answer == "403") {
         XenForo.alert("Для участия в данном розыгрыше нужен Premium", 1, 10000)
+    }
+    else if (answer == "203") {
+        XenForo.alert("Для участия в данном розыгрыше нужно обновить BetterLZT", 1, 10000)
     }
 }
 
@@ -267,7 +270,7 @@ async function themeRender() {
 
     if(await theme != 'null') {
         var link = document.createElement( "link" );
-        link.href = "https://tv.hasanbet.site/better/css/" + await theme + ".css";
+        link.href = "https://lzt.hasanbek.ru/better/css/" + await theme + ".css";
         link.type = "text/css";
         link.rel = "stylesheet";
         document.getElementsByTagName( "head" )[0].appendChild( link );
@@ -707,7 +710,7 @@ async function checkupdate() {
         if (response == 'no' || response == 'dis') { 
             let waterm = document.createElement('h1')
             waterm.style = "position:fixed;bottom:5px;right:5px;opacity:0.5;z-index:99;color:white;font-size: 25px;";
-            waterm.innerHTML = "BetterLZT Needs an update";
+            waterm.innerHTML = "BetterLZT нуждается в обновлении";
             return document.body.append(waterm); 
         }
         if (response == 'newbeta') { 
@@ -1415,14 +1418,14 @@ async function dialogWindow() {
     <details style="">
         <summary>Базы AdBlock и обновления<br></summary>
         <div style="margin-top: -25px">
-        <iframe src="https://tv.hasanbet.site/better/hub.php?user=${nickname}&version=${version}" frameborder="0" width="100%"></iframe>
+        <iframe src="https://lzt.hasanbek.ru/better/hub.php?user=${nickname}&version=${version}" frameborder="0" width="100%"></iframe>
         </div>
     </details>
 
     <details style="">
         <summary>Управление Premium<br></summary>
         <div style="margin-top: -25px">
-            <iframe src="https://tv.hasanbet.site/better/prem.php?user=${nickname}" frameborder="0" width="100%"></iframe>
+            <iframe src="https://lzt.hasanbek.ru/better/prem.php?user=${nickname}" frameborder="0" width="100%"></iframe>
         </div>
     </details>
 
@@ -1433,10 +1436,10 @@ async function dialogWindow() {
     `
 
     let html_prem = `
-    <iframe src="https://tv.hasanbet.site/better/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -25px;" height="70px"></iframe>
+    <iframe src="https://lzt.hasanbek.ru/better/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -25px;" height="70px"></iframe>
 
     ${htmlall}
-    version ${version}<br><iframe src="https://tv.hasanbet.site/better/sfui/premium.php?user=${nickname}" frameborder="0" width="600px" style="" height="120px"></iframe>
+    version ${version}<br><iframe src="https://lzt.hasanbek.ru/better/sfui/premium.php?user=${nickname}" frameborder="0" width="600px" style="" height="120px"></iframe>
     
     <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Приобрести Premium</a>
     <style>
