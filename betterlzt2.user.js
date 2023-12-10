@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BetterLZT
 // @namespace    hasanbet
-// @version      v43
+// @version      v50
 // @description  Сделай свой жизнь на LolzTeam проще!
 // @author       https://zelenka.guru/lays (openresty)
 // @match        https://zelenka.guru/*
@@ -13,12 +13,13 @@
 // @connect      lzt.hasanbek.ru
 // @connect      localhost
 // @run-at       document-body
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=zelenka.guru
 // @license MIT
 // ==/UserScript==
 
 
 const
-    version         = "4.3",
+    version         = "5.0",
     blzt_link_tos   = "https://zelenka.guru/threads/5816508/",
     blzt_link_trust = "https://zelenka.guru/threads/5821466/",
     server          = "http://lzt.hasanbek.ru:8880",
@@ -26,20 +27,16 @@ const
     adlist_l        = ["threads", "members", "lolz.live", "zelenka.guru", "t.me"],
     adlist_white    = ["https://zelenka.guru/threads/5456926/", "zelenka.guru/threads/5545248/"];
 
-let usercss,
+let usercfg,
     adblock,
-    banner,
-    bannertxt,
     nickname,
     userid,
     cache,
-    adnicks,
     secure,
     hidelike,
     secretph,
     marketblock,
     theme,
-    simps,
     avamarket,
     avablock,
     contestblock,
@@ -49,9 +46,7 @@ let usercss,
     hidegpt;
 
 (async function() {
-    usercss     = await GM.getValue("usercss") ? GM.getValue("usercss") : 'null';
-    banner      = await GM.getValue("banner") ? GM.getValue("banner") : 'null';
-    bannertxt   = await GM.getValue("bannertxt") ? GM.getValue("bannertxt") : 'null';
+    usercfg      = await GM.getValue("usercfg") ? GM.getValue("usercfg") : `{'cfg': {}}`
     adblock     = await GM.getValue("adblock") ? GM.getValue("adblock") : 'null';
     avablock    = await GM.getValue("avablock") ? GM.getValue("avablock") : 'null';
     cache       = await GM.getValue("cache") ? GM.getValue("cache") : 'null';
@@ -60,7 +55,6 @@ let usercss,
     marketblock = await GM.getValue("marketblock") ? GM.getValue("marketblock") : 'null';
     secretph    = await GM.getValue("secretph") ? GM.getValue("secretph") : 'not';
     theme       = await GM.getValue("theme") ? GM.getValue("theme") : 'null';
-    simps       = await GM.getValue("simps") ? GM.getValue("simps") : 'null';
     avamarket   = await GM.getValue("avamarket") ? GM.getValue("avamarket") : 'null';
     uniqstatus  = await GM.getValue("uniqstatus") ? GM.getValue("uniqstatus") : 'null';
     contestblock= await GM.getValue("contestblock") ? GM.getValue("contestblock") : 'null';
@@ -191,8 +185,26 @@ async function daemon() {
         document.querySelector("input[name=secret_answer]:not(.completed)").classList.add("completed")
     }
 
-    // Сканирование кнопок в треде
+    // Сканирование bb-кодов в треде (они должны быть самыми первыми)
     if (document.location.pathname.includes('threads') && document.querySelector("blockquote")) {
+        let blockquotes = document.querySelectorAll("blockquote")
+        blockquotes.forEach(async (e) => {
+            if (e.innerHTML.trim().includes("betteraudio")) {
+                let str = e.innerHTML.trim();
+                let arr = str.split('=');
+                let value = arr[1].split(']')[0];
+                // console.log(await request(`${server}/v6/audio?id=${value}`))
+                let audio = await JSON.parse(await request(`${server}/v6/audio?id=${value}`));
+                console.log(audio)
+                let text = `
+                <h3>${audio.name} - ${audio.author}</h3>
+                <audio controls src="https://lzt.hasanbek.ru/better/media/${audio.src}">
+                </audio>
+                `
+                e.innerHTML = e.innerHTML.replace(/\[betteraudio=.*?\].*?\[\/betteraudio\]/g, text);
+            
+            }
+        })
         if (document.querySelector("blockquote").innerHTML.trim().includes("betterfast")) {
             let str = document.querySelector("blockquote").innerHTML.trim();
             let arr = str.split('=');
@@ -835,21 +847,32 @@ async function parseUsername(e) {
                 }
             }
         }
-        if (e.parentElement.parentElement.parentElement.parentElement.parentElement.classList[0] == "message" && data.svgcss) {
+        // if (e.parentElement.parentElement.parentElement.parentElement.parentElement.classList[0] == "message" && data.svgcss) {
            
-            let avatars = e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelectorAll(".avatarHolder:not(.custom)");
+        //     let avatars = e.parentNode.parentNode.parentNode.parentElement.parentElement.querySelectorAll(".avatarHolder:not(.custom)");
+        //     let svg = document.createElement('div');
+        //     svg.classList.add("avatarUserBadges");
+        //     svg.innerHTML = `
+        //     <span style="${data.svgcss}" class="avatarUserBadge  Tooltip ${!data.svg ? 'uniq_default' : ''}" title="${data.bannertxt}" tabindex="0" data-cachedtitle="${data.bannertxt}">
+        //     <div class="customUniqIcon"> ${data.svg ? data.svg : ''} </div>
+        //     </span>`;
+        //     avatars.forEach(el => {
+        //         el.classList.add("custom")
+        //         el.prepend(svg);
+        //     });
+        // }
+        // parentElement.parentElement.parentElement.parentElement.querySelector(".avatarHolder"); 
+        if (e.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector('.avatarHolder') && data.svgcss) {
             let svg = document.createElement('div');
+            e.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)")
             svg.classList.add("avatarUserBadges");
             svg.innerHTML = `
             <span style="${data.svgcss}" class="avatarUserBadge  Tooltip ${!data.svg ? 'uniq_default' : ''}" title="${data.bannertxt}" tabindex="0" data-cachedtitle="${data.bannertxt}">
             <div class="customUniqIcon"> ${data.svg ? data.svg : ''} </div>
             </span>`;
-            avatars.forEach(el => {
-                el.classList.add("custom")
-                el.prepend(svg);
-            });
+            e.parentElement.parentElement.parentElement.parentElement.parentElement.querySelector(".avatarHolder").prepend(svg)
         }
-        // parentElement.parentElement.parentElement.parentElement.querySelector(".avatarHolder"); 
+
         if (e.parentElement.parentElement.parentElement.parentElement.querySelector(".avatarHolder") && data.svgcss) {
             let svg = document.createElement('div');
             e.parentElement.parentElement.parentElement.parentElement.querySelector(".avatarHolder:not(.custom)").classList.add("custom")
@@ -950,15 +973,8 @@ function setTheme(e) {
 }
 
 
-function setSimps(e) {
-    GM.setValue("simps", e)
-    simps = e;
-    XenForo.alert('BetterLZT> Успех!', 1, 10000);
-}
-
 function renderFunctions() {
     unsafeWindow.nickname = nickname;
-    unsafeWindow.usercss = usercss;
     unsafeWindow.server = server;
     unsafeWindow.cache = cache;
     unsafeWindow.version = version;
@@ -969,7 +985,6 @@ function renderFunctions() {
     unsafeWindow.avamarket = avamarket;
     unsafeWindow.secure = secure;
     unsafeWindow.theme = theme;
-    unsafeWindow.simps = simps
     unsafeWindow.shortcut = shortcut;
     unsafeWindow.uniqstatus = uniqstatus
     unsafeWindow.reportbtns = reportbtns
@@ -980,7 +995,6 @@ function renderFunctions() {
     unsafeWindow.setSecretph = e => setSecretph(e);
     unsafeWindow.setLike = e => setLike(e);
     unsafeWindow.setTheme = e => setTheme(e);
-    unsafeWindow.setSimps = e => setSimps(e);
     unsafeWindow.setAva = e => setAva(e);
     unsafeWindow.setUniq = e => setUniq(e);
     unsafeWindow.setContest = e => setContest(e);
@@ -988,7 +1002,7 @@ function renderFunctions() {
     unsafeWindow.setGpt = e => setGpt(e);
     unsafeWindow.setShortcut = e => setShortcut(e);
     unsafeWindow.request = request;
-    let torender = [uniqSave, voteTrust, shortcutSet, goodTrust, badTrust, commitVote, shortcutCall, simpsSet, doFast, SecretSet, ColorSet, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, cacheSync, blockNotice, BannerStyle, NickStyle];
+    let torender = [uniqSave, voteTrust, shortcutSet, goodTrust, badTrust, commitVote, shortcutCall, doFast, SecretSet, ColorSet, BgSet, dialogWindow, cacheSync, EmojiSet, getUID, usernames, parseUsername, cacheSync, blockNotice, BannerStyle, NickStyle];
     let funcs = torender.map(e => e.toString());
     let script = document.createElement('script');
     script.appendChild(document.createTextNode(funcs.join("")));
@@ -1086,18 +1100,6 @@ async function adBlockDaemon() {
             return;
         }
         return;
-    })
-    simpss = await simps
-    simpsss = parseInt(simpss)
-    threads = document.querySelectorAll(".discussionListItem");
-    threads.forEach(function (e){
-        if (simpsss >= 0) {
-            if(!e.querySelector(".contest")) {
-                if (parseInt(e.querySelector(".pclikeCount").innerHTML) < simpsss) {
-                    e.remove();
-                }
-            }
-        }
     })
 }
 
@@ -1345,9 +1347,11 @@ async function dialogWindow() {
     }
 
     let htmlall = `
+
+
     <details style="">
-        <summary>Основные<br><i>Реклама, секретный вопрос</i></summary>
-        <div style="margin-top: -25px">
+        <summary>Основные<br><span>Реклама, секретный вопрос</span></summary>
+        <div>
             <i>Отключить "Уники" от BetterLZT <input onclick="setUniq('${uniqstatust ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${uniqstatust ? 'checked' : ''} /> </i>    
 
             <i>Блокировщик рекламы <input onclick="setAdblock('${adblockt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${adblockt ? 'checked' : ''} /> </i>
@@ -1370,34 +1374,36 @@ async function dialogWindow() {
             
             <i>Быстрая вставка текста</i>
             <textarea id="shortcut" placeholder="[users=...][/users]">${await shortcut == 'null' ? '' : await shortcut}</textarea><a onclick="shortcutSet()" class="button leftButton primary">Сохранить</a>
-          
-        </div>
+         </div>
     </details>
 
     <details style="">
-        <summary>Выбор иконки у ника<br><i>Для выбора просто кликните на понравившуюся иконку</i></summary>
-        <div style="margin-top: -25px">
+        <summary>Выбор иконки у ника<br><span>Для выбора просто кликните на понравившуюся иконку</span></summary>
+        <div style="margin-top: -30px">
+        <p><b>Бесплатные:</b></p>
         <button onclick="EmojiSet('walking')"><i class="fas fa-walking"></i></button><button onclick="EmojiSet('code')"><i class="fas fa-code"></i></button> <button onclick="EmojiSet('silver')"><i class="fas fa-spinner fa-spin"></i></button>
-        <p>Premium  <i> <i class="fas fa-info"></i> Нужен Premium</i></p> <button onclick="EmojiSet('cookie')"><i class="fas fa-cookie" style="color: #228e5d;"></i></button><button onclick="EmojiSet('gold')"><i title="BetterLZT User" class="fas fa-spinner-third fa-spin"  style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('js')"><i class="fab fa-js-square" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('python')"><i class="fab fa-python" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
-        <button onclick="EmojiSet('admin')"><i class="fas fa-wrench" style="color: rgb(150,68,72);"></i></button><button onclick="EmojiSet('moderate')"><i class="fas fa-bolt" style="color: #12470D"></i></button><button onclick="EmojiSet('smoderate')"><i class="fas fa-bolt" style="color: rgb(46,162,74);"></i></button><button onclick="EmojiSet('arbitr')"><i class="fas fa-gavel" style="color: rgb(255,154,252);"></i></button><button onclick="EmojiSet('editor')"><i class="fas fa-pen" style="color: rgb(0,135,255);"></i></button>
-        <button onclick="EmojiSet('designer')"><i class="fas fa-drafting-compass" style="color: #5c45ff;"></i></button><button onclick="EmojiSet('designer2')"><i class="fas fa-drafting-compass" style="background: url('https://i.gifer.com/7HHu.gif');-webkit-background-clip: text;-webkit-text-fill-color: transparent;"></i></button><button onclick="EmojiSet('usd')"><i class="fas fa-badge-dollar" style="background: url('https://i.gifer.com/7HHu.gif');-webkit-background-clip: text;-webkit-text-fill-color: transparent;"></i></button>
-        <button onclick="EmojiSet('sueta')"><img src="https://nztcdn.com/files/310336b3-c10e-4ad1-8fdf-0bbe73835ca1.webp" height="18px"></button>
-        <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Установить свое</a>
-
-        <a class="button leftButton primary" onclick="EmojiSet('default')">Установить стандартное</a>
+        
+        <p><b>Доступные с Premium:</b></p>
+        <button onclick="EmojiSet('sueta')"><img src="https://nztcdn.com/files/310336b3-c10e-4ad1-8fdf-0bbe73835ca1.webp" height="18px"></button><button onclick="EmojiSet('cookie')"><i class="fas fa-cookie" style="color: #228e5d;"></i></button><button onclick="EmojiSet('gold')"><i title="BetterLZT User" class="fas fa-spinner-third fa-spin"  style="--fa-primary-color: #fe6906; --fa-secondary-color: #1a6eff; background: none; -webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('js')"><i class="fab fa-js-square" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('python')"><i class="fab fa-python" style="-webkit-text-fill-color: gold;"></i></button><button onclick="EmojiSet('verified')"><i class="fas fa-badge-check"></i></button>
+        <button onclick="EmojiSet('admin')"><i class="fas fa-wrench" style="color: rgb(150,68,72);"></i></button><button onclick="EmojiSet('moderate')"><i class="fas fa-bolt" style="color: #12470D"></i></button><button onclick="EmojiSet('smoderate')"><i class="fas fa-bolt" style="color: rgb(46,162,74);"></i></button><button onclick="EmojiSet('arbitr')"><i class="fas fa-gavel" style="color: rgb(255,154,252);"></i></button><button onclick="EmojiSet('editor')"><i class="fas fa-pen" style="color: rgb(0,135,255);"></i></button><button onclick="EmojiSet('designer')"><i class="fas fa-drafting-compass" style="color: #5c45ff;"></i></button><button onclick="EmojiSet('designer2')"><i class="fas fa-drafting-compass" style="background: url('https://i.gifer.com/7HHu.gif');-webkit-background-clip: text;-webkit-text-fill-color: transparent;"></i></button><button onclick="EmojiSet('usd')"><i class="fas fa-badge-dollar" style="background: url('https://i.gifer.com/7HHu.gif');-webkit-background-clip: text;-webkit-text-fill-color: transparent;"></i></button>
+        <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Установить свою</a>  <a class="button leftButton" onclick="EmojiSet('default')">Установить стандартное</a>
         </div>
     </details>
 
     <details style="">
         <summary>Кастомизация<br></summary>
         <div style="margin-top: -25px">
-            <h3>Фон</h3>
-            <i>Данный фон Вы будете видеть на всех страницах форума и маркета. Так же, он будет виден посетителям Вашего форума (при использовании расширения)</i>
+            <h3 style="display: inline; margin-bottom: 5px;">Фон</h3>
+            <span>Данный фон Вы будете видеть на всех страницах форума и маркета.
+            Так же, он будет виден посетителям Вашего форума (при использовании расширения)</span>
+
             <input id="bgurl" placeholder="Ссылка на картинку"> <a onclick="BgSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
             
-        
-            <h3>Своя тема</h3><i>Данную тему Вы будете видеть на всех страницах форума и маркета. Так же, она будет видна посетителям Вашего форума (при использовании расширения)</i>
-            <i> <i class="fas fa-italic"></i> Нужен Premium</i>
+            <hr style="border: solid 1px #363636;">
+            <h3 style="display: inline; margin-bottom: 5px;">Своя тема (Нужен Premium)</h3>
+            <span>Данную тему Вы будете видеть на всех страницах форума и маркета.
+            Так же, она будет видна посетителям Вашего форума (при использовании расширения)</span>
+            
             <input id="colorbg" placeholder="цвет в формате rgba()"> <a onclick="ColorSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
 
             
@@ -1407,10 +1413,8 @@ async function dialogWindow() {
     <details style="">
         <summary>Готовые темы<br></summary>
         <div style="margin-top: -25px">
-            <a class="button leftButton primary" onclick="setTheme('1')">Amoled</a> | <a class="button leftButton primary" onclick="setTheme('2')">BetterLZT</a> | <a class="button leftButton primary" onclick="setTheme('3')">Lime</a>
-            
-            <a class="button leftButton primary" onclick="setTheme('4')">LZT Purple</a> | <a class="button leftButton primary" onclick="setTheme('5')">Lzt Sakura</a>
-            
+            <a class="button leftButton" onclick="setTheme('1')">Amoled</a> <a class="button leftButton" onclick="setTheme('2')">BetterLZT</a>  <a class="button leftButton" onclick="setTheme('3')">Lime</a> <a class="button leftButton" onclick="setTheme('4')">LZT Purple</a> <a class="button leftButton" onclick="setTheme('5')">Lzt Sakura</a>
+        
             <a class="button leftButton primary" onclick="setTheme('null')">Отключить</a> 
         </div>
     </details>
@@ -1418,87 +1422,112 @@ async function dialogWindow() {
     <details style="">
         <summary>Базы AdBlock и обновления<br></summary>
         <div style="margin-top: -25px">
-        <iframe src="https://lzt.hasanbek.ru/better/hub.php?user=${nickname}&version=${version}" frameborder="0" width="100%"></iframe>
+        <iframe src="https://lzt.hasanbek.ru/better/exui/hub.php?user=${nickname}&version=${version}" frameborder="0" width="100%" height="500px"></iframe>
         </div>
     </details>
 
     <details style="">
         <summary>Управление Premium<br></summary>
         <div style="margin-top: -25px">
-            <iframe src="https://lzt.hasanbek.ru/better/prem.php?user=${nickname}" frameborder="0" width="100%"></iframe>
+            <iframe src="https://lzt.hasanbek.ru/better/exui/prem.php?user=${nickname}" frameborder="0" width="100%"></iframe>
         </div>
     </details>
-
-    <a class="button leftButton primary" href="account/uniq/test">Настроить уник</a>
-
-    <a class="button leftButton primary" href="https://greasyfork.org/ru/scripts/470626-betterlzt">Обновить</a>
-
     `
 
     let html_prem = `
     <iframe src="https://lzt.hasanbek.ru/better/ver.php?user=${nickname}&version=${version}" frameborder="0" width="100%" style="margin-top: -25px;" height="70px"></iframe>
 
     ${htmlall}
-    version ${version}<br><iframe src="https://lzt.hasanbek.ru/better/sfui/premium.php?user=${nickname}" frameborder="0" width="600px" style="" height="120px"></iframe>
-    
-    <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Приобрести Premium</a>
+    <div style="display: flex;
+    width: 598px;
+    justify-content: space-between;
+    align-items: flex-start;"> 
+    Version ${version}
+    <iframe src="https://lzt.hasanbek.ru/better/sfui/premium.php?user=${nickname}" frameborder="0" width="360px" style="" height="50px"></iframe>
+    </div>
+    <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Приобрести Premium</a> <a class="button leftButton" href="account/uniq/test">Настроить уник</a> <a class="button leftButton" href="https://greasyfork.org/ru/scripts/470626-betterlzt">Обновить расширение</a>
     <style>
     details {
         width: 100%;
-        background: #282828;
+        background: #272727;
+        border: solid 3px #363636;
         box-shadow: 0 0.1rem 1rem -0.5rem rgba(0, 0, 0, .4);
-        border-radius: 5px;
+        border-radius: 8px;
         overflow: hidden;
-        margin-top: -15px;
-   }
-    summary i{
-        font-size: 10px;
+        margin-top: -25px;
     }
     summary {
-        padding: 1rem;
+        padding: 12px 16px;
         display: block;
-        background: #333;
-        padding-left: 2.2rem;
+        background: #363636;
         position: relative;
         cursor: pointer;
-   }
-    summary:before {
-        content: '';
-        padding: 3px;
-        border-width: 0.4rem;
-        border-style: solid;
-        border-color: transparent transparent transparent #fff;
+
+        color: #D6D6D6;
+        font-family: Open Sans;
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+    }
+    summary span {
+        color: #949494;
+        font-size: 13px;
+    }
+    details span {
+        color: #949494;
+        font-size: 13px;
+    }
+    summary:after {
+        font-family: "Font Awesome 5 Pro";
+        color: rgb(148,148,148);
+        content: '\\f077';
         position: absolute;
-        top: 1.3rem;
-        left: 1rem;
-        transform: rotate(0);
+        left: 97%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(180deg);
         transform-origin: 0.2rem 50%;
         transition: 0.25s transform ease;
-   }
-    details[open] > div{
-        padding: 5px;
     }
-    details[open] > summary:before {
-        transform: rotate(90deg);
-   }
-    details summary::-webkit-details-marker {
-        display: none;
-   }
-    details > ul {
-        padding-bottom: 1rem;
-        margin-bottom: 0;
-   }
-    
+    details[open] > summary:after {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+    details[open] > div {
+        padding: 0px 20px;
+        margin-top: -25px;
+    }
+    details .leftButton {
+        margin-right: 10px;
+    }
     details button {
-        width: 35px; height: 35px; color: rgb(34,142,93); background: #303030; border: solid 1px white; font-size: 25px; margin-bottom: 5px; margin-left: 5px;
+        width: 45px;
+        height: 45px;
+        padding: 5px;
+        justify-content: center;
+        align-items: center;
+        color: rgb(34,142,93);
+        border-radius: 6px;
+        background: #363636;
+        border: none;
+        font-size: 25px;
+        margin-bottom: 10px;
+        margin-right: 10px;
+    }
+    details button.active {
+        border: 1.6px solid #07C682;
+        background: linear-gradient(180deg, rgba(7, 198, 130, 0.12) 0%, rgba(7, 198, 130, 0.00) 100%), #363636;
     }
     details input {
+        width: 77%;
         padding: 6px;
         border-radius: 6px;
         height: 20px;
         background: #303030;
         color: white;
         border: 1px solid rgb(54, 54, 54);
+    }
+    details input[type=checkbox] {
+        width: auto;
     }
     </style>
     `;
@@ -1536,11 +1565,6 @@ async function shortcutSet() {
     nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
     shortcut = document.querySelector("#shortcut").value;
     setShortcut(shortcut);
-}
-
-async function simpsSet() {
-    simps = document.querySelector("#simps").value;
-    setSimps(simps);
 }
 
 async function ColorSet() {

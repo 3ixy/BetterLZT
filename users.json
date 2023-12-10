@@ -10,5 +10,26 @@
 			"bannertxt": "BetterLZT <3",
 			"svgcss": "border-radius: 6px;background: url('https://media1.giphy.com/media/3o7522WIg2FkHbCHvO/giphy.gif') center center;text-shadow: 0px 0px 3px #7a00ff, 0px 1px 0px gray, 1px 2px 0px lime, 1px 3px 0px blue;color: white"
 		}
+	},
+	"fasts": {
+		"1": {
+			"title": "Первый тестовый фастик =)",
+			"id": 1,
+			"end": true,
+			"ammount": "50",
+			"totalusers": 10,
+			"maxusers": 10,
+			"users": {
+				"openresty": true
+			}
+		}
+	},
+	"audio": {
+		"thewarning-choke":
+		{
+			"author": "The Warning",
+			"name": "CHOKE",
+			"src": "https://lzt.hasanbek.ru/better/media/thewarning-choke.mp3"
+		}
 	}
 }
