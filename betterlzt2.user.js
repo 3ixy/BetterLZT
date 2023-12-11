@@ -25,7 +25,7 @@ const
     server          = "http://lzt.hasanbek.ru:8880",
     adlist_w        = ["zelenka.guru/threads/3649746", "http://proxysoxy.com", "zelenka.guru/threads/2770783", "https://t.me/talkthenews", "https://zelenka.guru/threads/5862277/", "zelenka.guru/threads/5802663/", "@UniServBot", "zelenka.guru/threads/5886612", "https://zelenka.guru/threads/5830418/", "zelenka.guru/angeldrainer/", "zelenka.guru/threads/5883557", "zelenka.guru/threads/5720998", "https://zelenka.guru/threads/5488501", "https://zelenka.guru/threads/4871985/", "zelenka.guru/threads/3649746", "zelenka.guru/threads/5402454", "zelenka.guru/threads/2630352", "https://t.me/poseidon_project", "https://zelenka.guru/threads/4826265/", "zelenka.guru/threads/4939541", "zelenka.guru/threads/4073607", "zelenka.guru/threads/5071761/", "https://zelenka.guru/threads/3695705/", "zelenka.guru/members/4177803", "@verif_ads", "verifteam", "SmmPanelUS.com", "lteboost.ru"],
     adlist_l        = ["threads", "members", "lolz.live", "zelenka.guru", "t.me"],
-    adlist_white    = ["https://zelenka.guru/threads/5456926/", "zelenka.guru/threads/5545248/"];
+    adlist_white    = ["zelenka.guru/threads/5545248/", "https://zelenka.guru/extasystudio/"];
 
 let usercfg,
     adblock,
@@ -720,15 +720,16 @@ async function checkupdate() {
         nickname = document.querySelector(".accountUsername.username").firstElementChild.innerText.trim();
         let response = await request(`${server}/v2/support?ver=${version}&user=${nickname}`).catch(err => {});
         if (response == 'no' || response == 'dis') { 
-            let waterm = document.createElement('h1')
+            let waterm = document.createElement('a')
             waterm.style = "position:fixed;bottom:5px;right:5px;opacity:0.5;z-index:99;color:white;font-size: 25px;";
-            waterm.innerHTML = "BetterLZT нуждается в обновлении";
+            waterm.innerHTML = "Для обновления BetterLZT кликните сюда";
+            waterm.href = "https://greasyfork.org/ru/scripts/470626-betterlzt"
             return document.body.append(waterm); 
         }
         if (response == 'newbeta') { 
             let waterm = document.createElement('h1')
             waterm.style = "position:fixed;bottom:5px;right:5px;opacity:0.5;z-index:99;color:white;font-size: 25px;";
-            waterm.innerHTML = "Вы получили доступ к новой Beta-версии BetterLZT (t.me/hasantigiev)";
+            waterm.innerHTML = "Вы получили доступ к Beta-версии BetterLZT (t.me/hasantigiev)";
             return document.body.append(waterm); 
         }
         // if (response == 'dis') { return XenForo.alert("Расширение BetterLZT нуждается в обновлении.\nБез него многие функции могут перестать работать.\nПерейдите в настройки", 1, 10000); }
@@ -1352,28 +1353,20 @@ async function dialogWindow() {
     <details style="">
         <summary>Основные<br><span>Реклама, секретный вопрос</span></summary>
         <div>
-            <i>Отключить "Уники" от BetterLZT <input onclick="setUniq('${uniqstatust ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${uniqstatust ? 'checked' : ''} /> </i>    
 
-            <i>Блокировщик рекламы <input onclick="setAdblock('${adblockt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${adblockt ? 'checked' : ''} /> </i>
+            <div class='btns-l'><input onclick="setUniq('${uniqstatust ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${uniqstatust ? 'checked' : ''} /> Отключить уники от BetterLZT</div> <div class='btns-l'><input onclick="setAdblock('${adblockt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${adblockt ? 'checked' : ''} /> Блокировщик рекламы</div>
+            <div class='btns-l'><input onclick="setMarketblock('${marketblockt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${marketblockt ? 'checked' : ''} /> Скрывать продавцов в ЧС</div> <div class='btns-l'><input onclick="setLike('${hideliket ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${hideliket ? 'checked' : ''} /> Скрывать счетчик лайков в профиле</div>
+            <div class='btns-l'><input onclick="setAva('${hideava ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${hideava ? 'checked' : ''} /> Скрывать аватарки на маркете</div> <div class='btns-l'><input onclick="setContest('${contestblockt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${contestblockt ? 'checked' : ''} /> Скрывать контент в розыгрышах</div>
+            <div class='btns-l'><input onclick="setReport('${reportbtnst ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${reportbtnst ? 'checked' : ''} /> Показывать кнопки для быстрой подачи жалоб</div> <div class='btns-l'><input onclick="setGpt('${hidegptt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${hidegptt ? 'checked' : ''} /> Скрывать ответы от ChatGPT</div>
+            <hr style="border: solid 1px #363636;">
+            <p class="main-text">Автоматический ввод секретной фразы:</p>
 
-            <i>Скрывать продавцов в ЧС <input onclick="setMarketblock('${marketblockt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${marketblockt ? 'checked' : ''} /> </i>
+            <input id="secretph" class="input" placeholder="Введите вашу секретную фразу"> <a onclick="SecretSet()" class="button leftButton primary">Сохранить</a>
             
-            <i>Скрывать счетчик лайков в профиле <input onclick="setLike('${hideliket ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${hideliket ? 'checked' : ''} /> </i>
+            <hr style="border: solid 1px #363636;">
+            <p class="main-text">Быстрая вставка текста</p>
 
-            <i>Скрывать аватарки на маркете <input onclick="setAva('${hideava ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${hideava ? 'checked' : ''} /> </i>
-            
-            <i>Скрывать контент с розыгрышей <input onclick="setContest('${contestblockt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${contestblockt ? 'checked' : ''} /> </i>
-            
-            <i>Показывать кнопки для быстрой подачи жалоб <input onclick="setReport('${reportbtnst ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${reportbtnst ? 'checked' : ''} /> </i>
-
-            <i>Скрывать ответы от ChatGPT <input onclick="setGpt('${hidegptt ? 'off' : 'on'}');" type="checkbox" id="scales" name="scales" ${hidegptt ? 'checked' : ''} /> </i>
-
-            <i>Секретная фраза</i>
-            <input id="secretph" placeholder="Секретная фраза"> <a onclick="SecretSet()" class="button leftButton primary">Сохранить</a>
-
-            
-            <i>Быстрая вставка текста</i>
-            <textarea id="shortcut" placeholder="[users=...][/users]">${await shortcut == 'null' ? '' : await shortcut}</textarea><a onclick="shortcutSet()" class="button leftButton primary">Сохранить</a>
+            <input class="input" id="shortcut" placeholder="Введите ваш текст (bb-code, например)" ${await shortcut == 'null' ? '' : 'value="'+await shortcut+'"'}> <a onclick="shortcutSet()" class="button leftButton primary">Сохранить</a>
          </div>
     </details>
 
@@ -1397,14 +1390,14 @@ async function dialogWindow() {
             <span>Данный фон Вы будете видеть на всех страницах форума и маркета.
             Так же, он будет виден посетителям Вашего форума (при использовании расширения)</span>
 
-            <input id="bgurl" placeholder="Ссылка на картинку"> <a onclick="BgSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
+            <input class="input" id="bgurl" placeholder="Ссылка на картинку"> <a onclick="BgSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
             
             <hr style="border: solid 1px #363636;">
             <h3 style="display: inline; margin-bottom: 5px;">Своя тема (Нужен Premium)</h3>
             <span>Данную тему Вы будете видеть на всех страницах форума и маркета.
             Так же, она будет видна посетителям Вашего форума (при использовании расширения)</span>
             
-            <input id="colorbg" placeholder="цвет в формате rgba()"> <a onclick="ColorSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
+            <input class="input" id="colorbg" placeholder="цвет в формате rgba()"> <a onclick="ColorSet()" class="button leftButton primary OverlayTrigger">Сохранить</a>
 
             
             </div>
@@ -1447,6 +1440,27 @@ async function dialogWindow() {
     </div>
     <a class="button leftButton primary" target="_blank" href="https://hasantigiev.t.me">Приобрести Premium</a> <a class="button leftButton" href="account/uniq/test">Настроить уник</a> <a class="button leftButton" href="https://greasyfork.org/ru/scripts/470626-betterlzt">Обновить расширение</a>
     <style>
+    .main-text {
+        font-size: 13px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        display: inline;
+    }
+    .btns-l {
+        margin-bottom: 10px;
+        margin-right: 10px;
+        border-radius: 6px;
+        display: inline-block;
+        padding: 7px 15px;
+        background: #363636;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        font-size: 13px;
+        font-style: normal;
+        font-weight: 600;
+    }
     details {
         width: 100%;
         background: #272727;
@@ -1517,7 +1531,7 @@ async function dialogWindow() {
         border: 1.6px solid #07C682;
         background: linear-gradient(180deg, rgba(7, 198, 130, 0.12) 0%, rgba(7, 198, 130, 0.00) 100%), #363636;
     }
-    details input {
+    details input.input{
         width: 77%;
         padding: 6px;
         border-radius: 6px;
@@ -1526,8 +1540,13 @@ async function dialogWindow() {
         color: white;
         border: 1px solid rgb(54, 54, 54);
     }
+    
     details input[type=checkbox] {
         width: auto;
+    }
+    details input[type=checkbox]:after {
+        border-radius: 4px;
+        border-width: unset;
     }
     </style>
     `;
